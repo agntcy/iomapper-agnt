@@ -1,7 +1,6 @@
 # IO-Mapper Agent
 
 [![Release](https://img.shields.io/github/v/release/agntcy/iomapper-agnt?display_name=tag)](CHANGELOG.md)
-[![Lint](https://github.com/agntcy/iomapper-agnt/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/marketplace/actions/super-linter)
 [![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](CODE_OF_CONDUCT.md)
 
 ## About The Project
@@ -55,14 +54,6 @@ Contributions are what make the open source community such an amazing place to
 learn, inspire, and create. Any contributions you make are **greatly
 appreciated**. For detailed contributing guidelines, please see
 [CONTRIBUTING.md](CONTRIBUTING.md)
-
-### Top contributors
-
-<a href="https://github.com/agntcy/iomapper-agnt/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=agntcy/iomapper-agnt" alt="contrib.rocks image" />
-</a>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License
 
