@@ -1,9 +1,0 @@
----
-extends: relaxed
-
-rules:
-  line-length: disable
-  comments: disable
-  indentation: disable
-  truthy:
-    check-keys: false
