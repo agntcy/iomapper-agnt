@@ -4,8 +4,14 @@ version = "0.1.0"
 license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
-authors = ["Jeff Napper <jenapper@cisco.com>", "Reginaldo Costa <regcosta@cisco.com>"]
-maintainers = ["Jeff Napper <jenapper@cisco.com>", "Reginaldo Costa <regcosta@cisco.com>"]
+authors = [
+    { name = "Jeff Napper", email = "jenapper@cisco.com" }, 
+    { name = "Reginaldo Costa", email = "regcosta@cisco.com" }
+]
+maintainers = [
+    { name = "Jeff Napper", email = "jenapper@cisco.com" }, 
+    { name = "Reginaldo Costa", email = "regcosta@cisco.com" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
