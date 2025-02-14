@@ -45,15 +45,15 @@ To get a local copy up and running follow these simple steps.
 Contributions are what make the open source community such an amazing place to
 learn, inspire, and create. Any contributions you make are **greatly
 appreciated**. For detailed contributing guidelines, please see
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[Contributing](#/CONTRIBUTING?id=how-to-contribute)
 
 ## Security
 
-For security policies and procedures, please see [SECURITY.md](SECURITY.md)
+For security policies and procedures, please see [Security](#/SECURITY?id=security-policies-and-procedures)
 
 ## Copyright Notice and License
 
-[Copyright Notice and License](LICENSE.md)
+[Copyright Notice and License](#/LICENSE?id=apache-license)
 
 Copyright (c) 2025 Cisco and/or its affiliates.
 

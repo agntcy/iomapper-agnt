@@ -52,7 +52,7 @@ appreciated**. For detailed contributing guidelines, please see
 
 ## Copyright Notice and License
 
-[Copyright Notice and License](./LICENSE.md)
+[Copyright Notice and License](./LICENSE)
 
 Copyright (c) 2025 Cisco and/or its affiliates.
 
