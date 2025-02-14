@@ -9,4 +9,4 @@
 * Any combination of the above
 
 [GitHub](https://github.com/agntcy/iomapper-agnt/)
-[Get Started](#iomapper-agnt)
+[Get Started](#getting-started)
