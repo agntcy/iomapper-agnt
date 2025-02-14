@@ -3,10 +3,9 @@
 
 > Transforms output from one agent into the input of another.
 
-* JSON structure transcoding: A JSON dictionary mapped into another JSON dictionary
-* Text summarisation: A  text can be summarised or some information removed
-* Text translation: A text can be translated from one language to another
-* Text manipulation: Reformulate a portion of input text into another text
+* JSON structure transcoding to remap a JSON dictionary
+* Text summarisation or some information removed
+* Text translation from one language to another
 * Any combination of the above
 
 [GitHub](https://github.com/agntcy/iomapper-agnt/)
