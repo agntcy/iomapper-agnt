@@ -5,28 +5,31 @@ license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
 authors = [
-    { name = "Jeff Napper", email = "jenapper@cisco.com" }, 
-    { name = "Reginaldo Costa", email = "regcosta@cisco.com" }
+  { name = "Jeff Napper", email = "jenapper@cisco.com" },
+  { name = "Reginaldo Costa", email = "regcosta@cisco.com" },
 ]
 maintainers = [
-    { name = "Jeff Napper", email = "jenapper@cisco.com" }, 
-    { name = "Reginaldo Costa", email = "regcosta@cisco.com" }
+  { name = "Jeff Napper", email = "jenapper@cisco.com" },
+  { name = "Reginaldo Costa", email = "regcosta@cisco.com" },
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-pydantic = "^2.9.1"
+python = ">=3.9.0,<4.0"
 python-dotenv = "^1.0.1"
 aiofiles = "^24.1.0"
-jsonschema = { extras=["format"], version="^4.23.0" }
 jinja2 = "^3.1.5"
 openapi-pydantic = "^0.5.1"
 pydantic-ai = "^0.0.23"
+jsonschema = { extras = ["format"], version = "^4.23.0" }
+jsonpath-ng = "^1.7.0"
+pydantic = "^2.10.6"
+
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 pytest-asyncio = "^0.23.5"
 deepdiff = "^8.1.1"
+
 
 [tool.poetry.group.sanity.dependencies]
 mypy = "^1.10.0"
@@ -35,9 +38,32 @@ ruff = "^0.4.6"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"
-markers = [
-    "llm: Requires access to an LLM"
-]
+markers = ["llm: Requires access to an LLM"]
+
+[tool.ruff]
+lint.select = ["E", "F", "I", "TID251"]
+lint.ignore = ["E501"]
+line-length = 88
+indent-width = 4
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.mypy]
+disallow_untyped_defs = true
+explicit_package_bases = true
+warn_no_return = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+allow_redefinition = true
+# https://mypy.readthedocs.io/en/stable/config_file.html
+disable_error_code = "typeddict-item, return-value, override, has-type"
 
 [build-system]
 requires = ["poetry-core"]

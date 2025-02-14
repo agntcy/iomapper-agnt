@@ -12,15 +12,15 @@ Communication between agents is not possible if there are discrepancies between 
 
 Ensuring that agents are semantically compatible, i.e., the output of the one agent contains the information needed
 by later agents, is an problem of composition or planning in the application. This project, the IO Mapper Agent,
-addresses level 2 and 3 compatibility.  It is a component, implemented as an agent, that can make use of an LLM
+addresses level 2 and 3 compatibility. It is a component, implemented as an agent, that can make use of an LLM
 to transform the output of one agent to become compatible to the input of another agent. Note that this may mean
 many different things, for example:
 
-* JSON structure transcoding: A JSON dictionary needs to be remapped into another JSON dictionary
-* Text summarisation: A  text needs to be summarised or some information needs to be removed
-* Text translation: A text needs to be translated from one language to another
-* Text manipulation: Part of the information of one text needs to be reformulated into another text
-* Any combination of the above
+- JSON structure transcoding: A JSON dictionary needs to be remapped into another JSON dictionary
+- Text summarisation: A text needs to be summarised or some information needs to be removed
+- Text translation: A text needs to be translated from one language to another
+- Text manipulation: Part of the information of one text needs to be reformulated into another text
+- Any combination of the above
 
 The IO mapper Agent can be fed the schema definitions of inputs and outputs as defined by the [Agent Connect Protocol](https://github.com/agntcy/acp-spec).
 
@@ -39,6 +39,9 @@ To get a local copy up and running follow these simple steps.
    ```
 
 ## Usage
+
+Learn how to use our different Mappers
+[USAGE.md](_usage.md)
 
 ## Contributing
 
@@ -61,7 +64,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

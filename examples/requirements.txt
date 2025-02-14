@@ -1,0 +1,4 @@
+langchain-core==0.3.35
+langgraph==0.2.72
+pydantic==2.10.6
+-e ../
