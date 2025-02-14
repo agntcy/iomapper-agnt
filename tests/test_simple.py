@@ -6,7 +6,7 @@ from openapi_pydantic import DataType, Schema
 
 from agntcy_iomapper import IOMapper, IOMapperInput, IOMapperOutput
 from agntcy_iomapper.base import ArgumentsDescription
-from utils import compareOutputs, compareOutputsAsync
+from utils import compare_outputs, compare_outputs_async
 
 SIMPLE_TEST_PARAMETERS = [
     (
@@ -108,11 +108,11 @@ SIMPLE_TEST_PARAMETERS = [
     "input, expected_output", SIMPLE_TEST_PARAMETERS,
 )
 @pytest.mark.llm
-async def test_simple_mapping_async(llmIOMapperConfig, jinjaEnvAsync, input, expected_output):
-    llmIOMapper = IOMapper(llmIOMapperConfig, jinja_env_async=jinjaEnvAsync)
+async def test_simple_mapping_async(llm_iomapper_config, jinja_env_async, input, expected_output):
+    llmIOMapper = IOMapper(llm_iomapper_config, jinja_env_async=jinja_env_async)
     output = await llmIOMapper.ainvoke(input)
     if isinstance(output.data, str):        
-        equalp = await compareOutputsAsync(llmIOMapper, output.data, expected_output.data)
+        equalp = await compare_outputs_async(llmIOMapper, output.data, expected_output.data)
         assert equalp
         return
 
@@ -125,11 +125,11 @@ async def test_simple_mapping_async(llmIOMapperConfig, jinjaEnvAsync, input, exp
     "input, expected_output", SIMPLE_TEST_PARAMETERS,
 )
 @pytest.mark.llm
-def test_simple_mapping(llmIOMapperConfig, jinjaEnv, input, expected_output):
-    llmIOMapper = IOMapper(llmIOMapperConfig, jinja_env=jinjaEnv)
+def test_simple_mapping(llm_iomapper_config, jinja_env, input, expected_output):
+    llmIOMapper = IOMapper(llm_iomapper_config, jinja_env=jinja_env)
     output = llmIOMapper.invoke(input)
     if isinstance(output.data, str):        
-        equalp = compareOutputs(llmIOMapper, output.data, expected_output.data)
+        equalp = compare_outputs(llmIOMapper, output.data, expected_output.data)
         assert equalp
         return
 

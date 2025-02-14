@@ -67,10 +67,6 @@ class BaseIOMapper(ABC):
     All io mappers wrappers inherited from BaseIOMapper.
     """
 
-    #
-    # def __init__(self, *args: Any, **kwargs: Any) -> None:
-    #     super().__init__(*args, **kwargs)
-
     @abstractmethod
     def invoke(self, input: IOMapperInput) -> IOMapperOutput:
         """Pass input data

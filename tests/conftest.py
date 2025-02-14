@@ -9,7 +9,7 @@ from agntcy_iomapper import IOMapperConfig, IOModelSettings, IOModelArgs
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
 
 @pytest.fixture
-def jinjaEnv() -> SandboxedEnvironment:
+def jinja_env() -> SandboxedEnvironment:
     return SandboxedEnvironment(
         loader=None,
         enable_async=False,
@@ -17,7 +17,7 @@ def jinjaEnv() -> SandboxedEnvironment:
     )
 
 @pytest.fixture
-def jinjaEnvAsync() -> SandboxedEnvironment:
+def jinja_env_async() -> SandboxedEnvironment:
     return SandboxedEnvironment(
         loader=None,
         enable_async=True,
@@ -25,7 +25,7 @@ def jinjaEnvAsync() -> SandboxedEnvironment:
     )
 
 @pytest.fixture
-def noLlmIOMapperConfig() -> IOMapperConfig:
+def no_llm_iomapper_config() -> IOMapperConfig:
     return IOMapperConfig(
         models = {},
         validate_json_input=True,
@@ -33,7 +33,7 @@ def noLlmIOMapperConfig() -> IOMapperConfig:
     )
 
 @pytest.fixture
-def llmIOMapperConfig() -> IOMapperConfig:
+def llm_iomapper_config() -> IOMapperConfig:
     return IOMapperConfig(
         models={
             "azure:gpt-4o-mini": IOModelArgs(

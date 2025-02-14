@@ -24,7 +24,7 @@ Answer the question by selecting one of the following options:
 Reasoning
 """
 
-async def compareOutputsAsync(iomapper: IOMapper, text1: str, text2: str) -> bool:
+async def compare_outputs_async(iomapper: IOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
         True, 
@@ -38,7 +38,7 @@ async def compareOutputsAsync(iomapper: IOMapper, text1: str, text2: str) -> boo
     match = matches.group(1)
     return match is not None and match.startswith("t")
 
-def compareOutputs(iomapper: IOMapper, text1: str, text2: str) -> bool:
+def compare_outputs(iomapper: IOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
         False, 
