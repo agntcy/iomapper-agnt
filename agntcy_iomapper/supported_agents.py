@@ -17,17 +17,31 @@ SupportedModelName = (
 
 
 def get_supported_agent(
-    is_async: bool,
     model_name: SupportedModelName,
     model_args: dict[str, Any] = {},
     **kwargs,
 ) -> Agent:
+    """
+    Creates and returns an `Agent` instance for the given model.
+
+    Args:
+        model_name (SupportedModelName): The name of the model to be used.
+            If the name starts with "azure:", an `AsyncAzureOpenAI` client is used.
+        model_args (dict[str, Any], optional): Additional arguments for model 
+            initialization. Defaults to an empty dictionary.
+        **kwargs: Additional keyword arguments passed to the `Agent` constructor.
+
+    Returns:
+        Agent: An instance of the `Agent` class configured with the specified model.
+
+    Notes:
+        - The `pydantic-ai` package does not currently pass `model_args` to the 
+          inferred model in the constructor, but this behavior might change in 
+          the future.
+    """
     if model_name.startswith("azure:"):
-        # Note: the client is always async even if you call run_sync
         client = AsyncAzureOpenAI(**model_args)
         model = OpenAIModel(model_name[6:], openai_client=client)
         return Agent(model, **kwargs)
 
-    # Note: The constructor (in pydantic-ai package) does not pass any model args
-    # to the inferred model. This might change in the future.
     return Agent(model_name, **kwargs)

@@ -4,7 +4,7 @@ from deepdiff import diff
 import pytest
 from openapi_pydantic import DataType, Schema
 
-from agntcy_iomapper import IOMapper, IOMapperInput, IOMapperOutput
+from agntcy_iomapper import AgentIOMapper, IOMapperInput, IOMapperOutput
 from agntcy_iomapper.base import ArgumentsDescription
 from utils import compare_outputs, compare_outputs_async
 
@@ -109,7 +109,7 @@ SIMPLE_TEST_PARAMETERS = [
 )
 @pytest.mark.llm
 async def test_simple_mapping_async(llm_iomapper_config, jinja_env_async, input, expected_output):
-    llmIOMapper = IOMapper(llm_iomapper_config, jinja_env_async=jinja_env_async)
+    llmIOMapper = AgentIOMapper(llm_iomapper_config, jinja_env_async=jinja_env_async)
     output = await llmIOMapper.ainvoke(input)
     if isinstance(output.data, str):        
         equalp = await compare_outputs_async(llmIOMapper, output.data, expected_output.data)
@@ -126,7 +126,7 @@ async def test_simple_mapping_async(llm_iomapper_config, jinja_env_async, input,
 )
 @pytest.mark.llm
 def test_simple_mapping(llm_iomapper_config, jinja_env, input, expected_output):
-    llmIOMapper = IOMapper(llm_iomapper_config, jinja_env=jinja_env)
+    llmIOMapper = AgentIOMapper(llm_iomapper_config, jinja_env=jinja_env)
     output = llmIOMapper.invoke(input)
     if isinstance(output.data, str):        
         equalp = compare_outputs(llmIOMapper, output.data, expected_output.data)

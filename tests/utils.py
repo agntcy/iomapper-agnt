@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
-from agntcy_iomapper import IOMapper
+from agntcy_iomapper import AgentIOMapper
 from agntcy_iomapper.supported_agents import get_supported_agent
 import re
 
@@ -24,10 +24,9 @@ Answer the question by selecting one of the following options:
 Reasoning
 """
 
-async def compare_outputs_async(iomapper: IOMapper, text1: str, text2: str) -> bool:
+async def compare_outputs_async(iomapper: AgentIOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
-        True, 
         model_name, 
         system_prompt=__COMPARE_SYSTEM_PROMPT, 
         model_args=iomapper.config.models[model_name],
@@ -38,10 +37,9 @@ async def compare_outputs_async(iomapper: IOMapper, text1: str, text2: str) -> b
     match = matches.group(1)
     return match is not None and match.startswith("t")
 
-def compare_outputs(iomapper: IOMapper, text1: str, text2: str) -> bool:
+def compare_outputs(iomapper: AgentIOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
-        False, 
         model_name, 
         system_prompt=__COMPARE_SYSTEM_PROMPT, 
         model_args=iomapper.config.models[model_name],

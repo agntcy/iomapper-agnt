@@ -8,7 +8,7 @@ from .base import (
     IOModelSettings,
 )
 from .iomapper import (
-    IOMapper,
+    AgentIOMapper,
     IOMapperConfig,
     IOModelArgs,
 )

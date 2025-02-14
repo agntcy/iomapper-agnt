@@ -75,7 +75,7 @@ class IOMapperConfig(BaseModel):
         return self
 
 
-class IOMapper(BaseIOMapper):
+class AgentIOMapper(BaseIOMapper):
     _json_search_pattern: ClassVar[re.Pattern] = re.compile(r"```json\n(.*?)\n```", re.DOTALL)
 
     def __init__(
@@ -160,7 +160,6 @@ class IOMapper(BaseIOMapper):
             raise ValueError(f"requested model {model_name} not found")
 
         return get_supported_agent(
-            is_async,
             model_name,
             model_args=self.config.models[model_name],
             system_prompt=system_prompt,
@@ -273,7 +272,7 @@ async def main():
     input = IOMapperInput.model_validate_json(inputs)
     logging.info(f"Loaded input from {args.inputfile}: {input.model_dump_json()}")
 
-    p = IOMapper(config, jinja_env)
+    p = AgentIOMapper(config, jinja_env)
     output = await p.ainvoke(input)
     outputs = output.model_dump_json()
 
