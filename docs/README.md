@@ -1,8 +1,5 @@
 # IO-Mapper Agent
 
-[![Release](https://img.shields.io/github/v/release/agntcy/iomapper-agnt?display_name=tag)](CHANGELOG.md)
-[![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](CODE_OF_CONDUCT.md)
-
 ## About The Project
 
 When connecting agents in an application, the output of one agent needs to be compatible with the input of the following agent. This compatibility needs to be guaranteed at three different levels:
