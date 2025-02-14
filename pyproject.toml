@@ -1,0 +1,38 @@
+[project]
+name = "agntcy-iomapper"
+version = "0.1.0"
+license = "Apache-2.0"
+description = "A tool to transform output from one agent to the input of another."
+readme = "README.md"
+authors = ["Jeff Napper <jenapper@cisco.com>", "Reginaldo Costa <regcosta@cisco.com>"]
+maintainers = ["Jeff Napper <jenapper@cisco.com>", "Reginaldo Costa <regcosta@cisco.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.9.1"
+python-dotenv = "^1.0.1"
+aiofiles = "^24.1.0"
+jsonschema = { extras=["format"], version="^4.23.0" }
+jinja2 = "^3.1.5"
+openapi-pydantic = "^0.5.1"
+pydantic-ai = "^0.0.23"
+
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+pytest-asyncio = "^0.23.5"
+deepdiff = "^8.1.1"
+
+[tool.poetry.group.sanity.dependencies]
+mypy = "^1.10.0"
+ruff = "^0.4.6"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+markers = [
+    "llm: Requires access to an LLM"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

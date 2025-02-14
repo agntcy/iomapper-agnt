@@ -1,8 +1,5 @@
 # IO-Mapper Agent
 
-[![Release](https://img.shields.io/github/v/release/agntcy/iomapper-agnt?display_name=tag)](CHANGELOG.md)
-[![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](CODE_OF_CONDUCT.md)
-
 ## About The Project
 
 When connecting agents in an application, the output of one agent needs to be compatible with the input of the following agent. This compatibility needs to be guaranteed at three different levels:
@@ -48,11 +45,15 @@ To get a local copy up and running follow these simple steps.
 Contributions are what make the open source community such an amazing place to
 learn, inspire, and create. Any contributions you make are **greatly
 appreciated**. For detailed contributing guidelines, please see
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[Contributing](CONTRIBUTING#how-to-contribute)
+
+## Security
+
+For security policies and procedures, please see [Security](SECURITY#security-policies-and-procedures)
 
 ## Copyright Notice and License
 
-[Copyright Notice and License](./LICENSE)
+[Copyright Notice and License](LICENSE#apache-license)
 
 Copyright (c) 2025 Cisco and/or its affiliates.
 
@@ -60,7 +61,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
