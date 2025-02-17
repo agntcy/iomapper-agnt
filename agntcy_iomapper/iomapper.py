@@ -2,21 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 import argparse
 import asyncio
-import aiofiles
-import logging
-import jsonschema
 import json
+import logging
 import re
+from typing import ClassVar, TypedDict
 
-from dotenv import load_dotenv, find_dotenv
-from pydantic import Field, model_validator, BaseModel
-from typing import TypedDict, ClassVar
-from typing_extensions import Self
+import aiofiles
+import jsonschema
+from dotenv import find_dotenv, load_dotenv
 from jinja2 import Environment
 from jinja2.sandbox import SandboxedEnvironment
+from pydantic import BaseModel, Field, model_validator
 from pydantic_ai import Agent
+from typing_extensions import Self
 
-from .base import BaseIOMapper, IOModelSettings, IOMapperOutput, IOMapperInput
+from .base import BaseIOMapper, IOMapperInput, IOMapperOutput, IOModelSettings
 from .supported_agents import get_supported_agent
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,9 @@ class IOMapperConfig(BaseModel):
 
 
 class AgentIOMapper(BaseIOMapper):
-    _json_search_pattern: ClassVar[re.Pattern] = re.compile(r"```json\n(.*?)\n```", re.DOTALL)
+    _json_search_pattern: ClassVar[re.Pattern] = re.compile(
+        r"```json\n(.*?)\n```", re.DOTALL
+    )
 
     def __init__(
         self,

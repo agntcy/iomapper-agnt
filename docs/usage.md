@@ -61,7 +61,3 @@ make run_imperative_example
 
 [GitHub](https://github.com/agntcy/iomapper-agnt/)
 [Get Started](#getting-started)
-
-```
-
-```

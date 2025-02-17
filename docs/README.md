@@ -41,7 +41,7 @@ To get a local copy up and running follow these simple steps.
 ## Usage
 
 Learn how to use our different Mappers
-[USAGE.md](_usage.md)
+[usage.md](usage)
 
 ## Contributing
 
