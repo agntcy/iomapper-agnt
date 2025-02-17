@@ -7,6 +7,7 @@ from .base import (
     IOMapperOutput,
     IOModelSettings,
 )
+from .imperative import ImperativeIOMapper
 from .iomapper import (
     AgentIOMapper,
     IOMapperConfig,

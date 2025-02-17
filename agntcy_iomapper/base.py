@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
-from abc import abstractmethod, ABC
-from pydantic import BaseModel, model_validator, Field
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, TypedDict
+
 from openapi_pydantic import Schema
+from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
-from typing import TypedDict
 
 
 class ArgumentsDescription(BaseModel):
