@@ -17,7 +17,7 @@ consistent data transformation is required.
 
 import json
 import logging
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Union
 
 import jsonschema
 from jsonpath_ng.ext import parse
@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 class ImperativeIOMapper(BaseIOMapper):
-    field_mapping: Dict[str, Union[str, Callable]]
+    field_mapping: dict[str, Union[str, Callable]]
     """A dictionary for where the keys are fields of the output object
     and values are JSONPath (strings) representing how the mapping
     """
 
-    def __init__(self, field_mapping: Dict[str, Union[str, Callable]]) -> None:
+    def __init__(self, field_mapping: dict[str, Union[str, Callable]] | None) -> None:
         super().__init__()
         self.field_mapping = field_mapping
 

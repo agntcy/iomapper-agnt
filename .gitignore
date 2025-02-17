@@ -22,3 +22,6 @@ dmypy.json
 
 # misc
 .DS_Store
+
+# Tests
+.*_cache/
