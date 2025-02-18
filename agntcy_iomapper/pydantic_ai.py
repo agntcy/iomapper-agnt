@@ -140,20 +140,28 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
         super().__init__(config, **kwargs)
 
     def _get_model_settings(self, input: PydanticAIAgentIOMapperInput):
-        model_name = input.model or self.config.default_model
+        if hasattr(input, "model") and input.model is not None:
+            model_name = input.model
+        else:
+            model_name = self.config.default_model
+        
         if model_name not in self.config.models:
             raise ValueError(f"requested model {model_name} not found")
-        elif input.model_settings is None:
-            return self.config.default_model_settings[model_name]
-        else:
+        elif hasattr(input, "model_settings") and input.model_settings is not None:
             model_settings = self.config.default_model_settings[model_name].copy()
             model_settings.update(input.model_settings)
             return model_settings
+        else:
+            return self.config.default_model_settings[model_name]
 
     def _get_agent(
         self, input: PydanticAIAgentIOMapperInput, system_prompt: str
     ) -> Agent:
-        model_name = input.model or self.config.default_model
+        if hasattr(input, "model") and input.model is not None:
+            model_name = input.model
+        else:
+            model_name = self.config.default_model
+
         if model_name not in self.config.models:
             raise ValueError(f"requested model {model_name} not found")
 
