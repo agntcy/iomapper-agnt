@@ -38,10 +38,25 @@ class BaseIOMapperOutput(BaseModel):
     )
 
 
+class BaseIOMapperConfig(BaseModel):
+    validate_json_input: bool = Field(
+        default=False, description="Validate input against JSON schema."
+    )
+    validate_json_output: bool = Field(
+        default=False, description="Validate output against JSON schema."
+    )
+
+
 class BaseIOMapper(ABC):
     """Abstract base class for interfacing with io mapper.
     All io mappers wrappers inherited from BaseIOMapper.
     """
+
+    def __init__(
+        self,
+        config: BaseIOMapperConfig | None = None,
+    ):
+        self.config = config if config is not None else BaseIOMapperConfig()
 
     @abstractmethod
     def invoke(self, input: BaseIOMapperInput) -> BaseIOMapperOutput:

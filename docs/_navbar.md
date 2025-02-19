@@ -1,0 +1,6 @@
+* [Getting Started](#getting-started)
+* [Usage](usage#usage)
+    * [Pydantic-AI Agentic IOMapper](usage#pydantic-ai)
+    * [LangGraph Agentic IOMapper](usage#langgraph)
+    * [JSON Deterministic IOMapper](usage#use-imperative--deterministic-mapper)
+* [Contributing](CONTRIBUTING#how-to-contribute)

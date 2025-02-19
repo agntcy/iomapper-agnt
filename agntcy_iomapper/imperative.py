@@ -22,7 +22,12 @@ from typing import Any, Callable, Union
 import jsonschema
 from jsonpath_ng.ext import parse
 
-from .base import BaseIOMapper, BaseIOMapperInput, BaseIOMapperOutput
+from .base import (
+    BaseIOMapper,
+    BaseIOMapperConfig,
+    BaseIOMapperInput,
+    BaseIOMapperOutput,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +42,12 @@ class ImperativeIOMapper(BaseIOMapper):
     and values are JSONPath (strings) representing how the mapping
     """
 
-    def __init__(self, field_mapping: dict[str, Union[str, Callable]] | None) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        field_mapping: dict[str, Union[str, Callable]] | None,
+        config: BaseIOMapperConfig | None = None,
+    ) -> None:
+        super().__init__(config)
         self.field_mapping = field_mapping
 
     def invoke(self, input: ImperativeIOMapperInput) -> ImperativeIOMapperOutput | None:

@@ -144,7 +144,7 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
             model_name = input.model
         else:
             model_name = self.config.default_model
-        
+
         if model_name not in self.config.models:
             raise ValueError(f"requested model {model_name} not found")
         elif hasattr(input, "model_settings") and input.model_settings is not None:
@@ -197,7 +197,12 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
 
         return (system_prompt, user_prompt, message_history)
 
-    def _invoke(self, input: PydanticAIAgentIOMapperInput, messages: list[dict[str, str]], **kwargs) -> str:
+    def _invoke(
+        self,
+        input: PydanticAIAgentIOMapperInput,
+        messages: list[dict[str, str]],
+        **kwargs,
+    ) -> str:
         system_prompt, user_prompt, message_history = self._get_prompts(messages)
 
         agent = self._get_agent(input, system_prompt)
@@ -208,7 +213,12 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
         )
         return response.data
 
-    async def _ainvoke(self, input: PydanticAIAgentIOMapperInput, messages: list[dict[str, str]], **kwargs) -> str:
+    async def _ainvoke(
+        self,
+        input: PydanticAIAgentIOMapperInput,
+        messages: list[dict[str, str]],
+        **kwargs,
+    ) -> str:
         system_prompt, user_prompt, message_history = self._get_prompts(messages)
 
         agent = self._get_agent(input, system_prompt)

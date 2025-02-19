@@ -5,12 +5,18 @@ import logging
 import re
 from abc import abstractmethod
 from typing import ClassVar
+
 import jsonschema
 from jinja2 import Environment
 from jinja2.sandbox import SandboxedEnvironment
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from .base import BaseIOMapper, BaseIOMapperInput, BaseIOMapperOutput
+from .base import (
+    BaseIOMapper,
+    BaseIOMapperConfig,
+    BaseIOMapperInput,
+    BaseIOMapperOutput,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +32,7 @@ class AgentIOMapperInput(BaseIOMapperInput):
 AgentIOMapperOutput = BaseIOMapperOutput
 
 
-class AgentIOMapperConfig(BaseModel):
-    validate_json_input: bool = Field(
-        default=False, description="Validate input against JSON schema."
-    )
-    validate_json_output: bool = Field(
-        default=False, description="Validate output against JSON schema."
-    )
+class AgentIOMapperConfig(BaseIOMapperConfig):
     system_prompt_template: str = Field(
         max_length=4096,
         default="You are a translation machine. You translate both natural language and object formats for computers.",
@@ -52,14 +52,13 @@ class AgentIOMapper(BaseIOMapper):
 
     def __init__(
         self,
-        config: AgentIOMapperConfig,
-        *,
+        config: AgentIOMapperConfig | None = None,
         jinja_env: Environment | None = None,
         jinja_env_async: Environment | None = None,
     ):
-        super().__init__()
-
-        self.config = config
+        if config is None:
+            config = AgentIOMapperConfig()
+        super().__init__(config)
 
         if jinja_env is not None and jinja_env.is_async:
             raise ValueError("Async Jinja env passed to jinja_env argument")
@@ -167,7 +166,8 @@ class AgentIOMapper(BaseIOMapper):
             user_template = self.user_template
         user_prompt = user_template.render(render_env)
 
-        outputs = self._invoke(input,
+        outputs = self._invoke(
+            input,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -180,7 +180,9 @@ class AgentIOMapper(BaseIOMapper):
         return output
 
     @abstractmethod
-    def _invoke(self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs) -> str:
+    def _invoke(
+        self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs
+    ) -> str:
         """Invoke internal model to process messages.
         Args:
             messages: the messages to send to the LLM
@@ -201,7 +203,8 @@ class AgentIOMapper(BaseIOMapper):
             user_template_async = self.user_template_async
         user_prompt = await user_template_async.render_async(render_env)
 
-        outputs = await self._ainvoke(input,
+        outputs = await self._ainvoke(
+            input,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -214,7 +217,9 @@ class AgentIOMapper(BaseIOMapper):
         return output
 
     @abstractmethod
-    async def _ainvoke(self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs) -> str:
+    async def _ainvoke(
+        self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs
+    ) -> str:
         """Async invoke internal model to process messages.
         Args:
             messages: the messages to send to the LLM
