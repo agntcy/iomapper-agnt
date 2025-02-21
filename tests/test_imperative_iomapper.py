@@ -5,8 +5,8 @@ import json
 import pytest
 from openapi_pydantic import Schema
 
-from agntcy_iomapper import ImperativeIOMapper
-from agntcy_iomapper.base import ArgumentsDescription, IOMapperInput
+from agntcy_iomapper.imperative import ImperativeIOMapper, ImperativeIOMapperInput
+from agntcy_iomapper.base import ArgumentsDescription
 
 
 @pytest.mark.parametrize(
@@ -182,7 +182,7 @@ def test_imperative_iomapp(
         field_mapping=field_mapping,
     )
 
-    input = IOMapperInput(
+    input = ImperativeIOMapperInput(
         input=ArgumentsDescription(json_schema=Schema.model_validate(input_schema)),
         output=ArgumentsDescription(json_schema=Schema.model_validate(output_schema)),
         data=input_value,

@@ -22,9 +22,18 @@ from typing import Any, Callable, Union
 import jsonschema
 from jsonpath_ng.ext import parse
 
-from agntcy_iomapper.base import BaseIOMapper, IOMapperInput, IOMapperOutput
+from .base import (
+    BaseIOMapper,
+    BaseIOMapperConfig,
+    BaseIOMapperInput,
+    BaseIOMapperOutput,
+)
 
 logger = logging.getLogger(__name__)
+
+
+ImperativeIOMapperInput = BaseIOMapperInput
+ImperativeIOMapperOutput = BaseIOMapperOutput
 
 
 class ImperativeIOMapper(BaseIOMapper):
@@ -33,23 +42,29 @@ class ImperativeIOMapper(BaseIOMapper):
     and values are JSONPath (strings) representing how the mapping
     """
 
-    def __init__(self, field_mapping: dict[str, Union[str, Callable]] | None) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        field_mapping: dict[str, Union[str, Callable]] | None,
+        config: BaseIOMapperConfig | None = None,
+    ) -> None:
+        super().__init__(config)
         self.field_mapping = field_mapping
 
-    def invoke(self, input: IOMapperInput) -> IOMapperOutput | None:
+    def invoke(self, input: ImperativeIOMapperInput) -> ImperativeIOMapperOutput | None:
         if input.data is None:
             return None
         if self.field_mapping is None:
-            return IOMapperOutput(data=input.data)
+            return ImperativeIOMapperOutput(data=input.data)
 
         data = self._imperative_map(input)
-        return IOMapperOutput(data=data)
+        return ImperativeIOMapperOutput(data=data)
 
-    def ainvoke(self, input: IOMapperInput) -> IOMapperOutput | None:
+    def ainvoke(
+        self, input: ImperativeIOMapperInput
+    ) -> ImperativeIOMapperOutput | None:
         return self.invoke(input)
 
-    def _imperative_map(self, input_definition: IOMapperInput) -> Any:
+    def _imperative_map(self, input_definition: ImperativeIOMapperInput) -> Any:
         """
         Converts input data to a desired output type.
 

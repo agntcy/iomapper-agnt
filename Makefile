@@ -44,7 +44,7 @@ setup: set_python_env
 # ============================
 
 setup_test: set_python_env
-	@poetry install --with=test
+	@poetry install --with=test --all-extras
 
 test: setup_test
 	poetry run pytest -vvrx

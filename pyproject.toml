@@ -1,6 +1,6 @@
 [project]
 name = "agntcy-iomapper"
-version = "0.1.0"
+version = "0.2.0"
 license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
@@ -19,11 +19,17 @@ python-dotenv = "^1.0.1"
 aiofiles = "^24.1.0"
 jinja2 = "^3.1.5"
 openapi-pydantic = "^0.5.1"
-pydantic-ai = "^0.0.23"
+pydantic-ai = { version = "^0.0.23", optional = true }
 jsonschema = { extras = ["format"], version = "^4.23.0" }
 jsonpath-ng = "^1.7.0"
 pydantic = "^2.10.6"
+langchain = { version = "^0.3.19", optional = true }
+langgraph = { version = "^0.2.73", optional = true }
+langchain-openai = { version = "^0.3.6", optional = true }
 
+[tool.poetry.extras]
+langgraph = [ "langchain", "langgraph", "langchain-openai" ]
+pydantic-ai = [ "pydantic-ai" ]
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"
