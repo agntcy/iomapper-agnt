@@ -1,7 +1,7 @@
 # Usage
 
-The Agntcy IO Mapper functions provided an easy to use package for mapping output from 
-one agent to another. The data can be described in JSON or with natural language. The 
+The Agntcy IO Mapper functions provided an easy to use package for mapping output from
+one agent to another. The data can be described in JSON or with natural language. The
 (incomplete) [pydantic](https://docs.pydantic.dev/latest/) models follow:
 
 ```python
@@ -23,16 +23,16 @@ class BaseIOMapperConfig(BaseModel):
     validate_json_output: bool = Field(description="Validate output against JSON schema.")
 ```
 
-There are several different ways to leverage the IO Mapper functions in Python. There 
-is an [agentic interface](#use-agent-io-mapper) using models that can be invoked on 
-different AI platforms and a [imperative interface](#use-imperative--deterministic-io-mapper) 
+There are several different ways to leverage the IO Mapper functions in Python. There
+is an [agentic interface](#use-agent-io-mapper) using models that can be invoked on
+different AI platforms and a [imperative interface](#use-imperative--deterministic-io-mapper)
 that does deterministic JSON remapping without using any AI models.
 
 ## Use Agent IO Mapper
 
-The Agent IO Mapper uses an LLM/model to transform the inputs (typically output of the 
+The Agent IO Mapper uses an LLM/model to transform the inputs (typically output of the
 first agent) to match the desired output (typically the input of a second agent). As such,
-it additionally supports specifying the model prompts for the translation. The configuration 
+it additionally supports specifying the model prompts for the translation. The configuration
 object provides a specification for the system and default user prompts:
 
 ```python
@@ -54,11 +54,11 @@ class AgentIOMapperInput(BaseIOMapperInput):
     )
 ```
 
-Further specification of models and their arguments is left to the underlying supported 
+Further specification of models and their arguments is left to the underlying supported
 packages:
-  * [Pydantic-AI](#pydantic-ai)
-  * [LangGraph](#langgraph)
 
+- [Pydantic-AI](#pydantic-ai)
+- [LangGraph](#langgraph)
 
 ### Pydantic-AI
 
@@ -70,8 +70,8 @@ This project supports specifying model interations using [LangGraph](https://lan
 
 ## Use Imperative / Deterministic IO Mapper
 
-The code snippet below illustrates a fully functional deterministic mapping that 
-transforms the output of one agent into input for a second agent. The code for the 
+The code snippet below illustrates a fully functional deterministic mapping that
+transforms the output of one agent into input for a second agent. The code for the
 agents is omitted.
 
 ```python
@@ -89,7 +89,7 @@ agents is omitted.
      }
  }
 
- # the mapping object using jsonpath, note: the value of the mapping 
+ # the mapping object using jsonpath, note: the value of the mapping
  # can be either a jsonpath or a function
  mapping_object = {
      "prof_question": "$.question",
@@ -115,8 +115,8 @@ agents is omitted.
 
 ### Use Examples
 
-1. To run the examples we strongly recommend that a 
-  [virtual environment is created](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
+1. To run the examples we strongly recommend that a
+   [virtual environment is created](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
 2. Install the requirements file
 3. From within examples folder run:
 

@@ -5,8 +5,8 @@ import json
 import pytest
 from openapi_pydantic import Schema
 
-from agntcy_iomapper.imperative import ImperativeIOMapper, ImperativeIOMapperInput
 from agntcy_iomapper.base import ArgumentsDescription
+from agntcy_iomapper.imperative import ImperativeIOMapper, ImperativeIOMapperInput
 
 
 @pytest.mark.parametrize(

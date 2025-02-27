@@ -22,7 +22,7 @@ from typing import Any, Callable, Union
 import jsonschema
 from jsonpath_ng.ext import parse
 
-from .base import (
+from agntcy_iomapper.base import (
     BaseIOMapper,
     BaseIOMapperConfig,
     BaseIOMapperInput,

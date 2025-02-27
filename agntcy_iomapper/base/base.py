@@ -9,26 +9,61 @@ from typing_extensions import Self
 
 
 class ArgumentsDescription(BaseModel):
+    """
+    ArgumentsDescription a pydantic model that defines
+    the details necessary to perfom io mapping between two agents
+    """
+
     json_schema: Schema | None = Field(
         default=None, description="Data format JSON schema"
     )
     description: str | None = Field(
         default=None, description="Data (semantic) natural language description"
     )
+    agent_manifest: dict[str, Any] | None = Field(
+        default=None,
+        description="Agent Manifest definition as per https://agntcy.github.io/acp-spec/openapi.html#model/agentmanifest",
+    )
 
     @model_validator(mode="after")
     def _validate_obj(self) -> Self:
-        if self.json_schema is None and self.description is None:
+        if (
+            self.json_schema is None
+            and self.description is None
+            and self.agent_manifest
+        ):
             raise ValueError(
-                'Either the "schema" field and/or the "description" field must be specified.'
+                'Either the "schema" field and/or the "description" or agent_manifest field must be specified.'
             )
         return self
 
 
 class BaseIOMapperInput(BaseModel):
-    input: ArgumentsDescription = Field(description="Input data descriptions")
-    output: ArgumentsDescription = Field(description="Output data descriptions")
+    input: ArgumentsDescription = Field(
+        description="Input data descriptions",
+    )
+    output: ArgumentsDescription = Field(
+        description="Output data descriptions",
+    )
     data: Any = Field(description="Data to translate")
+
+    @model_validator(mode="after")
+    def _validate_obj(self) -> Self:
+        if self.input.agent_manifest is not None:
+            # given an input agents manifest map its ouput definition
+            # because the data to be mapped is the result of calling the input agent
+            self.input.json_schema = Schema.model_validate(
+                self.input.agent_manifest["specs"]["output"]
+            )
+
+        if self.output.agent_manifest:
+            # given an output agents manifest map its input definition
+            # because the data to be mapped would be mapped to it's input
+            self.output.json_schema = Schema.model_validate(
+                self.output.agent_manifest["specs"]["input"]
+            )
+
+        return self
 
 
 class BaseIOMapperOutput(BaseModel):
