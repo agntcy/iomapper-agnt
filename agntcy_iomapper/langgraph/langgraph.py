@@ -5,11 +5,11 @@ from typing import Any
 
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
-from langchain_core.runnables import Runnable, RunnableConfig
+from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 from pydantic import Field
 
-from .agent_iomapper import (
+from agntcy_iomapper.base import (
     AgentIOMapper,
     AgentIOMapperConfig,
     AgentIOMapperInput,
@@ -86,9 +86,3 @@ class LangGraphIOMapper:
 
     def as_runnable(self):
         return RunnableCallable(self.invoke, self.ainvoke, name="extract", trace=False)
-
-
-def create_iomapper(
-    config: LangGraphIOMapperConfig,
-) -> Runnable[LangGraphIOMapperInput, LangGraphIOMapperOutput]:
-    return LangGraphIOMapper(config).as_runnable()
