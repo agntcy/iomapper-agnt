@@ -23,9 +23,11 @@ LangGraphIOMapperOutput = AgentIOMapperOutput
 
 
 class LangGraphIOMapperConfig(AgentIOMapperConfig):
-    llm: BaseChatModel | str = Field(
-        default="anthropic:claude-3-5-sonnet-latest",
-        description="Model to use for translation as LangChain description or model class.",
+    llm: BaseChatModel | str = (
+        Field(
+            ...,
+            description="Model to use for translation as LangChain description or model class.",
+        ),
     )
 
 
@@ -67,20 +69,28 @@ class _LangGraphAgentIOMapper(AgentIOMapper):
 
 
 class LangGraphIOMapper:
-    def __init__(self, config: LangGraphIOMapperConfig):
+    def __init__(
+        self,
+        config: LangGraphIOMapperConfig,
+        input: LangGraphIOMapperInput | None = None,
+    ):
         self._iomapper = _LangGraphAgentIOMapper(config)
+        self._input = input
 
     async def ainvoke(self, state: dict[str, Any], config: RunnableConfig) -> dict:
-        response = await self._iomapper.ainvoke(input=state["input"], config=config)
+        input = self._input if self._input else state["input"]
+        response = await self._iomapper.ainvoke(input=input, config=config)
         if response is not None:
-            return {"output": response}
+            return response.data
         else:
             return {}
 
     def invoke(self, state: dict[str, Any], config: RunnableConfig) -> dict:
-        response = self._iomapper.invoke(input=state["input"], config=config)
+        input = self._input if self._input else state["input"]
+        response = self._iomapper.invoke(input=input, config=config)
+
         if response is not None:
-            return {"output": response}
+            return response.data
         else:
             return {}
 

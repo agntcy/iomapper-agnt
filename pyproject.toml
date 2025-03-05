@@ -26,6 +26,8 @@ pydantic = "^2.10.6"
 langchain = { version = "^0.3.19", optional = true }
 langgraph = { version = "^0.2.73", optional = true }
 langchain-openai = { version = "^0.3.6", optional = true }
+llama-index = "^0.12.20"
+jsonref = "^1.1.0"
 
 [tool.poetry.extras]
 langgraph = [ "langchain", "langgraph", "langchain-openai" ]

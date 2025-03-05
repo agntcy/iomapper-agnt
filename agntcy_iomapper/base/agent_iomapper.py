@@ -125,6 +125,8 @@ class AgentIOMapper(BaseIOMapper):
             )
 
         # Check if data is returned in JSON markdown text
+        logger.info(f"{outputs}")
+
         matches = self._json_search_pattern.findall(outputs)
         if matches:
             outputs = matches[-1]

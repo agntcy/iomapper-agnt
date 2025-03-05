@@ -8,28 +8,57 @@ from agntcy_iomapper.base import (
     ArgumentsDescription,
 )
 
-AGENTIO_TEST_PARAMETERS = [
+AGENTIO_TEST_PARAMETERS_TRANSLATIONS = [
     (
         AgentIOMapperInput(
             input=ArgumentsDescription(description="Text in English."),
-            output=ArgumentsDescription(description="Text in French."),
+            output=ArgumentsDescription(
+                description="",
+                json_schema=Schema(
+                    properties={
+                        "translation": Schema(
+                            type=DataType.STRING,
+                            description="result of translation to french",
+                            example="Je suis",
+                        )
+                    }
+                ),
+            ),
             data="Would you please tell me where I can buy some snails?",
         ),
         AgentIOMapperOutput(
-            data="Pourriez-vous s'il vous plaît me dire où je peux acheter des escargots?",
+            data={
+                "translation": "Pourriez-vous s'il vous plaît me dire où je peux acheter des escargots ?"
+            },
         ),
     ),
     (
         AgentIOMapperInput(
             input=ArgumentsDescription(description=""),
-            output=ArgumentsDescription(description=""),
+            output=ArgumentsDescription(
+                description="",
+                json_schema=Schema(
+                    properties={
+                        "translation": Schema(
+                            type=DataType.STRING,
+                            description="result of translation to french",
+                            example="Je suis",
+                        )
+                    }
+                ),
+            ),
             data="Would you please tell me where I can buy some snails?",
-            message_template="Translate from English to French the following data: {{ data }}",
+            message_template="Translate from English to French the following data: {{ data }} the output schema is {{output.json_schema}}",
         ),
         AgentIOMapperOutput(
-            data="Pourriez-vous s'il vous plaît me dire où je peux acheter des escargots?",
+            data={
+                "translation": "Pourriez-vous s'il vous plaît me dire où je peux acheter des escargots ?"
+            },
         ),
     ),
+]
+
+AGENTIO_TEST_PARAMETERS = [
     (
         AgentIOMapperInput(
             input=ArgumentsDescription(
