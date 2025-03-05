@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0"
 import json
 from pathlib import Path
+from typing import List, TypedDict
 
 import pytest
-from deepdiff import diff
 from langgraph.graph import END, START, StateGraph
 
 from agntcy_iomapper.base import (
@@ -13,7 +13,30 @@ from agntcy_iomapper.base import (
     ArgumentsDescription,
 )
 from agntcy_iomapper.langgraph import create_langraph_iomapper
-from tests.util import State, compare_outputs_async
+
+
+class Email(TypedDict):
+    direction: str
+    subject: str
+    content: str
+
+
+class Agent1Model(TypedDict):
+    instructions: str
+    emailchain: List[Email]
+    context: str
+
+
+class Agent2Model(TypedDict):
+    email: str
+    audience: str
+
+
+class State(TypedDict):
+    input: Agent1Model
+    email: str
+    audience: str
+
 
 HERE = Path(__file__).parent
 mailwriter_manifest = json.load(
@@ -112,19 +135,7 @@ async def test_mapping_from_manifest(
 
     expected_mapp = AgentIOMapperOutput(data=expected_output)
 
-    output_state = await graph.ainvoke(State(input=input))
-    output = output_state["output"]
-
-    if isinstance(output.data, str):
-        equalp = await compare_outputs_async(
-            llm_iomapper_config.llm, output.data, expected_output.data
-        )
-        assert equalp
-        return
-
-    print(output.data)
-
-    outputs = output.model_dump(exclude_unset=True, exclude_none=True)
+    output_state = await graph.ainvoke({"input": input})
     expects = expected_mapp.model_dump(exclude_unset=True, exclude_none=True)
-    mapdiff = diff.DeepDiff(outputs, expects)
-    assert len(mapdiff.affected_paths) == 0
+    assert output_state["email"] == expects["data"]["email"]
+    assert output_state["audience"] == expects["data"]["audience"]

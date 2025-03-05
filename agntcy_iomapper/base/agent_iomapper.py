@@ -124,6 +124,8 @@ class AgentIOMapper(BaseIOMapper):
                 f'{{"data": {json.dumps(outputs)} }}'
             )
 
+        logger.debug(f"{outputs}")
+
         # Check if data is returned in JSON markdown text
         matches = self._json_search_pattern.findall(outputs)
         if matches:

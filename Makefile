@@ -43,8 +43,13 @@ setup: set_python_env
 
 # ============================
 
-setup_test: set_python_env
+setup_test:
 	@poetry install --with=test --all-extras
 
 test: setup_test
 	poetry run pytest -vvrx
+test_manifest: setup_test
+	poetry run pytest tests/test_agent_iomapper_from_manifest.py
+
+test_langgraph_agent: setup_test
+	poetry run pytest tests/test_langgraph_agent_iomapper.py

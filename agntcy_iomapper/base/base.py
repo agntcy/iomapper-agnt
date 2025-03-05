@@ -108,13 +108,3 @@ class BaseIOMapper(ABC):
         Args:
             input: the data to be mapped
         """
-
-
-class _ArgumentsDescription:
-    @staticmethod
-    def input_args_description(data):
-        return ArgumentsDescription(is_source_agent=True, **data)
-
-    @staticmethod
-    def output_args_description(data):
-        return ArgumentsDescription(is_source_agent=False, **data)
