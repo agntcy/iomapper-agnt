@@ -8,4 +8,5 @@ faiss-cpu==1.10.0
 llama-index-core==0.12.22
 llama-index-utils-workflow==0.3.0
 llama-index-llms-azure-openai==0.3.1
+llama-index-vector-stores-docarray==0.40.0
 -e ../

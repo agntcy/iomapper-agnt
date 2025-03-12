@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0"
 
 from .create_llamaindex_iomapper import IOMappingWorkflow
+from .llamaindex import IOMapperAgent
 
-__all__ = ["IOMappingWorkflow"]
+__all__ = ["IOMappingWorkflow", "IOMapperAgent"]

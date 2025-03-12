@@ -1,6 +1,9 @@
 from typing import Any, Dict, List, Optional, Type
 
 from openapi_pydantic import Schema
+from pydantic import BaseModel
+
+from agntcy_iomapper.base import AgentIOMapperInput, ArgumentsDescription
 
 
 def _create_type_from_schema(
@@ -176,3 +179,40 @@ def _filter_properties(schema, properties, paths):
                 continue
 
     return filtered_schema
+
+
+def instantiate_input(
+    data: Any,
+    input_fields: List[str],
+    output_fields: List[str],
+    input_schema: Optional[dict[str, str]] = None,
+    output_schema: Optional[dict[str, str]] = None,
+) -> AgentIOMapperInput:
+
+    input_type = None
+    output_type = None
+
+    if isinstance(data, BaseModel):
+        input_data_schema = data.model_json_schema()
+        output_type = _create_type_from_schema(input_data_schema, output_fields)
+        input_type = _create_type_from_schema(input_data_schema, input_fields)
+    else:
+        # Read the optional fields
+        if not input_schema or not output_schema:
+            raise ValueError(
+                "input_schema, and or output_schema are missing from the metadata, for a better accuracy you are required to provide them in this scenario"
+            )
+        output_type = Schema.model_validate(output_schema)
+        input_type = Schema.model_validate(input_schema)
+
+    data_to_be_mapped = _extract_nested_fields(data, fields=input_fields)
+
+    return AgentIOMapperInput(
+        input=ArgumentsDescription(
+            json_schema=input_type,
+        ),
+        output=ArgumentsDescription(
+            json_schema=output_type,
+        ),
+        data=data_to_be_mapped,
+    )

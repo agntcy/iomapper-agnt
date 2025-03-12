@@ -1,4 +1,3 @@
-import os
 from typing import List, TypedDict, Union
 
 from langchain.schema import Document
@@ -11,6 +10,7 @@ from pydantic import TypeAdapter
 from agntcy_iomapper.langgraph import io_mapper_node
 from examples.llm import get_azure
 from examples.models import RecipeQuery, RecipeResponse
+from examples.models.data import recipes
 
 
 class GraphState(TypedDict):
@@ -19,13 +19,6 @@ class GraphState(TypedDict):
     recipe: Union[RecipeResponse, None]
     formatted_output: Union[str, None]
 
-
-# Small in-memory dataset of recipes stored as raw text
-recipes = [
-    "Pasta Primavera: Ingredients - pasta, tomato, garlic, olive oil. Instructions - Boil pasta, sauté garlic and tomatoes in olive oil, mix together.",
-    "Avocado Toast: Ingredients - bread, avocado, salt, pepper. Instructions - Toast bread, mash avocado, spread on toast, add salt and pepper.",
-    "Omelette: Ingredients - egg, cheese, onion, butter. Instructions - Beat eggs, cook in butter, add cheese and onions, fold omelette.",
-]
 
 embed = FakeEmbeddings(size=100)
 vector_store = FAISS.from_texts(recipes, embed)
