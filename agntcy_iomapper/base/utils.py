@@ -120,7 +120,6 @@ def resolve_ref(ref, current_defs):
 
 def _refine_schema(schema, paths):
     filtered_schema = {}
-    print(f"{paths}-{schema}")
 
     for path in paths:
         path_parts = path.split(".")
@@ -153,7 +152,6 @@ def _refine_schema(schema, paths):
                 properties = _filter_properties(
                     root_schema, curr_properties, path_parts[1:]
                 )
-    print(f" after {paths}-{filtered_schema}")
     return filtered_schema
 
 

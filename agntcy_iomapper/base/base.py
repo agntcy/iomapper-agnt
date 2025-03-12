@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Union, Optional
 
 from openapi_pydantic import Schema
 from pydantic import BaseModel, Field, model_validator
@@ -14,13 +14,13 @@ class ArgumentsDescription(BaseModel):
     the details necessary to perfom io mapping between two agents
     """
 
-    json_schema: Schema | None = Field(
+    json_schema: Optional[Schema] = Field(
         default=None, description="Data format JSON schema"
     )
-    description: str | None = Field(
+    description: Optional[str] = Field(
         default=None, description="Data (semantic) natural language description"
     )
-    agent_manifest: dict[str, Any] | None = Field(
+    agent_manifest: Optional[dict[str, Any]] = Field(
         default=None,
         description="Agent Manifest definition as per https://agntcy.github.io/acp-spec/openapi.html#model/agentmanifest",
     )
@@ -89,7 +89,7 @@ class BaseIOMapper(ABC):
 
     def __init__(
         self,
-        config: BaseIOMapperConfig | None = None,
+        config: Optional[BaseIOMapperConfig] = None,
     ):
         self.config = config if config is not None else BaseIOMapperConfig()
 

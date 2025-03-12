@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0"
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from llama_index.core.base.llms.base import BaseLLM
 from llama_index.core.llms import ChatMessage
@@ -24,7 +24,7 @@ class LLamaIndexIOMapperConfig(AgentIOMapperConfig):
 class _LLmaIndexAgentIOMapper(AgentIOMapper):
     def __init__(
         self,
-        config: LLamaIndexIOMapperConfig | None = None,
+        config: Optional[LLamaIndexIOMapperConfig] = None,
         **kwargs,
     ):
         if config is None:

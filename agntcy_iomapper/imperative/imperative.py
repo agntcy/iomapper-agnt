@@ -17,7 +17,7 @@ consistent data transformation is required.
 
 import json
 import logging
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 import jsonschema
 from jsonpath_ng.ext import parse
@@ -44,13 +44,15 @@ class ImperativeIOMapper(BaseIOMapper):
 
     def __init__(
         self,
-        field_mapping: dict[str, Union[str, Callable]] | None,
-        config: BaseIOMapperConfig | None = None,
+        field_mapping: Optional[dict[str, Union[str, Callable]]],
+        config: Optional[BaseIOMapperConfig] = None,
     ) -> None:
         super().__init__(config)
         self.field_mapping = field_mapping
 
-    def invoke(self, input: ImperativeIOMapperInput) -> ImperativeIOMapperOutput | None:
+    def invoke(
+        self, input: ImperativeIOMapperInput
+    ) -> Optional[ImperativeIOMapperOutput]:
         if input.data is None:
             return None
         if self.field_mapping is None:
@@ -61,7 +63,7 @@ class ImperativeIOMapper(BaseIOMapper):
 
     def ainvoke(
         self, input: ImperativeIOMapperInput
-    ) -> ImperativeIOMapperOutput | None:
+    ) -> Optional[ImperativeIOMapperOutput]:
         return self.invoke(input)
 
     def _imperative_map(self, input_definition: ImperativeIOMapperInput) -> Any:
