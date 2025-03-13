@@ -1,10 +1,15 @@
+import json
+import logging
 from typing import Any, Dict, List, Optional, Type
 
+import jsonref
 from openapi_pydantic import Schema
+
+logger = logging.getLogger(__name__)
 
 
 def _create_type_from_schema(
-    json_schema: Dict[str, Any], pick_fields: List[str]
+    json_schema: Dict[str, Any], json_paths: List[str]
 ) -> Optional[Type]:
     """
     Creates a new Pydantic model with only the specified fields from a JSON schema.
@@ -16,58 +21,100 @@ def _create_type_from_schema(
     Returns:
         A new Pydantic model class containing only the specified fields.
     """
-    defs = json_schema.get("$defs", {})
-    properties = json_schema.get("properties", {})
+
+    flatten_json = jsonref.loads(json.dumps(json_schema))
+
+    properties = flatten_json.get("properties", {})
+
     filtered_properties = {}
 
-    for path in pick_fields:
+    for path in json_paths:
         parts = path.split(".")
-        root_item = parts[0]
-        prop = properties[root_item]
+        curr_key = parts[0]
 
-        if "anyOf" in prop:
-            final_schema = []
-            filtered_properties[root_item] = {}
-            _extract_schema(prop, defs, final_schema)
-            filtered_properties[root_item]["anyOf"] = final_schema
+        if curr_key in properties:
+            curr_object_def = properties.get(curr_key)
+            filtered_properties[curr_key] = curr_object_def
 
-        elif "items" in prop:
-            final_schema = []
-            _extract_schema(prop, defs, final_schema)
-            filtered_properties[root_item] = {"type": "array", "items": final_schema}
+            if "anyOf" in curr_object_def:
+                sub_schemas = curr_object_def.get("anyOf")
+                filtered_properties[curr_key]["anyOf"] = []
+                for sub_schema in sub_schemas:
+                    if "properties" in sub_schema:
+                        _props = sub_schema.get("properties", {})
+                        filtered_properties[curr_key]["anyOf"].append(
+                            _get_properties(1, parts, _props, flatten_json)
+                        )
 
-        elif "$ref" in prop:
-            resolved_def = resolve_ref(prop.get("$ref"), defs)
-            filtered_properties[root_item] = resolved_def
+                    elif "items" in sub_schema:
+                        _curr_items = curr_object_def.get("items", {})
+                        filtered_properties[curr_key]["anyOf"].append(
+                            _get_properties(1, parts, _curr_items, flatten_json)
+                        )
+            if "properties" in curr_object_def:
+                props = curr_object_def.get("properties", {})
+                filtered_properties[curr_key]["properties"] = _get_properties(
+                    1, parts, props, flatten_json
+                )
+            elif "items" in curr_object_def:
+                curr_items = curr_object_def.get("items", {})
+                filtered_properties[curr_key]["items"] = _get_properties(
+                    1, parts, curr_items, flatten_json
+                )
 
         else:
-            final_schema = []
-            filtered_properties[root_item] = {}
-            _extract_schema(prop, defs, final_schema)
-            filtered_properties[root_item] = final_schema
-    # TODO - remove fields not selected from the output
-    # filtered_properties = _refine_schema(filtered_properties, pick_fields)
+
+            filtered_properties[curr_key] = {"type": "object", "properties": {}}
+            if len(parts) == 1:
+                filtered_properties[curr_key]["properties"] = flatten_json
+            else:
+                filtered_properties[curr_key]["properties"] = _get_properties(
+                    1, parts, {}, flatten_json
+                )
 
     return Schema.model_validate(filtered_properties)
 
 
-def _extract_schema(json_schema, defs, schema):
-    if "anyOf" in json_schema:
-        for val in json_schema.get("anyOf"):
-            _extract_schema(val, defs, schema)
-    elif "items" in json_schema:
-        item = json_schema.get("items")
-        _extract_schema(item, defs, schema)
-    elif "$ref" in json_schema:
-        ref = json_schema.get("$ref")
-        schema.append(resolve_ref(ref, defs))
-    elif "type" in json_schema:
-        schema.append(json_schema)
+def _get_properties(level, parts, properties, json_schema):
+    if level >= len(parts):
+        return properties
+
+    curr_key = parts[level]
+    if level >= len(parts) - 1 and len(properties) == 0:
+        return {curr_key: json_schema}
+
+    if curr_key in properties:
+        curr_obj = properties.get(curr_key)
+        if "properties" in curr_obj:
+            curr_properties = curr_obj.get("properties", {})
+            curr_obj["properties"] = _get_properties(
+                level + 1, parts, curr_properties, json_schema
+            )
+        elif "items" in curr_obj:
+            curr_properties = curr_obj.get("items", {})
+            curr_obj["items"] = _get_properties(
+                level + 1, parts, curr_properties, json_schema
+            )
+        elif "anyOf" in curr_obj:
+            curr_obj["anyOf"] = []
+            sub_schemas = curr_obj.get("anyOf")
+            for sub_schema in sub_schemas:
+                curr_obj["anyOf"].append(
+                    _get_properties(level, sub_schema, json_schema)
+                )
+
+        return curr_obj
     else:
-        return
+        curr_obj = {curr_key: {"type": "object", "properties": {}}}
+        curr_obj[curr_key]["properties"] = _get_properties(
+            level + 1, parts, {}, json_schema
+        )
+        return curr_obj
+
+    return properties
 
 
-def _extract_nested_fields(data: Any, fields: List[str]) -> dict:
+def extract_nested_fields(data: Any, fields: List[str]) -> dict:
     """Extracts specified fields from a potentially nested data structure
     Args:
         data: The input data (can be any type)
@@ -86,7 +133,7 @@ def _extract_nested_fields(data: Any, fields: List[str]) -> dict:
             value = _get_nested_value(data, field_path)
             results[field_path] = value
         except (KeyError, TypeError, AttributeError, ValueError) as e:
-            print(f"Error extracting field {field_path}: {e}")
+            logger.error(f"Error extracting field {field_path}: {e}")
     return results
 
 
@@ -116,61 +163,3 @@ def resolve_ref(ref, current_defs):
     for part in ref_parts[2:]:
         current = current.get(part)
     return current
-
-
-def _refine_schema(schema, paths):
-    filtered_schema = {}
-
-    for path in paths:
-        path_parts = path.split(".")
-        if path_parts[0] in schema:
-            key = path_parts[0]
-            root_schema = schema.get(key)
-            properties = {}
-            if "anyOf" in root_schema:
-                filtered_schema[key] = {}
-                sub_schemas = root_schema.get("anyOf")
-
-                for sub_schema in sub_schemas:
-                    if "properties" in sub_schema:
-                        curr_properties = sub_schema.get("properties")
-                        properties = _filter_properties(
-                            sub_schema, curr_properties, path_parts[1:]
-                        )
-                        if key in filtered_schema:
-                            if "anyOf" not in filtered_schema:
-                                filtered_schema[key]["anyOf"] = [
-                                    {"properties": properties}
-                                ]
-                            else:
-                                filtered_schema[key]["anyOf"]
-
-            elif "items" in root_schema:
-                sub_schemas = root_schema.get("items")
-            elif "properties" in root_schema:
-                curr_properties = root_schema.get("properties")
-                properties = _filter_properties(
-                    root_schema, curr_properties, path_parts[1:]
-                )
-    return filtered_schema
-
-
-def _filter_properties(schema, properties, paths):
-    filtered_schema = {}
-
-    if len(paths) == 0:
-        return schema
-
-    for path in paths:
-        if path in properties:
-            filtered_schema[path] = properties.get(path)
-            if "properties" in filtered_schema[path]:
-                return _filter_properties(
-                    schema, filtered_schema[path].get("properties"), paths[1:]
-                )
-            elif path in schema:
-                filtered_schema[path] = schema.get(path)
-            else:
-                continue
-
-    return filtered_schema

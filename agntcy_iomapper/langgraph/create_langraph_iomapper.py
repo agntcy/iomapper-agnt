@@ -6,7 +6,7 @@ from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
 from agntcy_iomapper.base import AgentIOMapperInput, ArgumentsDescription
-from agntcy_iomapper.base.utils import _create_type_from_schema, _extract_nested_fields
+from agntcy_iomapper.base.utils import _create_type_from_schema, extract_nested_fields
 
 from .langgraph import (
     LangGraphIOMapper,
@@ -71,22 +71,26 @@ def io_mapper_node(data: Any, config: dict) -> Runnable:
         )
     input_type = None
     output_type = None
+    data_schema = None
 
     if isinstance(data, BaseModel):
-        input_schema = data.model_json_schema()
-    else:
-        # Read the optional fields
-        input_schema = metadata["input_schema"]
-        output_schema = metadata["output_schema"]
-        if not input_schema or not output_schema:
-            raise ValueError(
-                "input_schema, and or output_schema are missing from the metadata, for a better accuracy you are required to provide them in this scenario"
-            )
+        data_schema = data.model_json_schema()
+    # If input schema is provided it overwrites the data schema
+    input_schema = metadata.get("input_schema", data_schema)
+    # If output schema is provided it overwrites the data schema
+    output_schema = metadata.get("output_schema", data_schema)
 
-    output_type = _create_type_from_schema(input_schema, output_fields)
+    # If there is a template for the output the output_schema is going to be ignored in the translation
+    output_template = metadata.get("output_template", None)
+
+    if not input_schema or not output_schema:
+        raise ValueError(
+            "input_schema, and or output_schema are missing from the metadata, for a better accuracy you are required to provide them in this scenario"
+        )
     input_type = _create_type_from_schema(input_schema, input_fields)
+    output_type = _create_type_from_schema(output_schema, output_fields)
 
-    data_to_be_mapped = _extract_nested_fields(data, fields=input_fields)
+    data_to_be_mapped = extract_nested_fields(data, fields=input_fields)
 
     input = AgentIOMapperInput(
         input=ArgumentsDescription(
@@ -96,6 +100,7 @@ def io_mapper_node(data: Any, config: dict) -> Runnable:
             json_schema=output_type,
         ),
         data=data_to_be_mapped,
+        message_template=output_template,
     )
 
     iomapper_config = LangGraphIOMapperConfig(llm=llm)

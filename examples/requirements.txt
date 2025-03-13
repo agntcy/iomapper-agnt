@@ -1,5 +1,5 @@
 langchain-core>=0.3.35
-langgraph==0.2.72
+langgraph~=0.3.5
 pydantic==2.10.6
 langchain-openai==0.3.6
 langchain>=0.3.19
@@ -9,3 +9,4 @@ llama-index-core==0.12.22
 llama-index-utils-workflow==0.3.0
 llama-index-llms-azure-openai==0.3.1
 -e ../
+-e ../../acp-sdk/acp-sdk/
