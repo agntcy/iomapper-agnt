@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any
+from typing import Any, Optional, Union
 
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
@@ -23,7 +23,7 @@ LangGraphIOMapperOutput = AgentIOMapperOutput
 
 
 class LangGraphIOMapperConfig(AgentIOMapperConfig):
-    llm: BaseChatModel | str = (
+    llm: Union[BaseChatModel, str] = (
         Field(
             ...,
             description="Model to use for translation as LangChain description or model class.",
@@ -34,7 +34,7 @@ class LangGraphIOMapperConfig(AgentIOMapperConfig):
 class _LangGraphAgentIOMapper(AgentIOMapper):
     def __init__(
         self,
-        config: LangGraphIOMapperConfig | None = None,
+        config: Optional[LangGraphIOMapperConfig] = None,
         **kwargs,
     ):
         if config is None:
@@ -50,7 +50,7 @@ class _LangGraphAgentIOMapper(AgentIOMapper):
         input: LangGraphIOMapperInput,
         messages: list[dict[str, str]],
         *,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> str:
         response = self.llm.invoke(messages, config, **kwargs)
@@ -61,7 +61,7 @@ class _LangGraphAgentIOMapper(AgentIOMapper):
         input: LangGraphIOMapperOutput,
         messages: list[dict[str, str]],
         *,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> str:
         response = await self.llm.ainvoke(messages, config, **kwargs)
@@ -72,7 +72,7 @@ class LangGraphIOMapper:
     def __init__(
         self,
         config: LangGraphIOMapperConfig,
-        input: LangGraphIOMapperInput | None = None,
+        input: Optional[LangGraphIOMapperInput] = None,
     ):
         self._iomapper = _LangGraphAgentIOMapper(config)
         self._input = input

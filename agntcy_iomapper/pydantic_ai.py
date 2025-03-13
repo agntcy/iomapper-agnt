@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, Optional, TypedDict
 
 from openai import AsyncAzureOpenAI
 from pydantic import Field, model_validator
@@ -49,11 +49,11 @@ class AgentModelSettings(TypedDict, total=False):
 
 
 class PydanticAIAgentIOMapperInput(AgentIOMapperInput):
-    model_settings: AgentModelSettings | None = Field(
+    model_settings: Optional[AgentModelSettings] = Field(
         default=None,
         description="Specific arguments for LLM transformation.",
     )
-    model: str | None = Field(
+    model: Optional[str] = Field(
         default=None,
         description="Specific model out of those configured to handle request.",
     )
@@ -67,7 +67,7 @@ class PydanticAIAgentIOMapperConfig(AgentIOMapperConfig):
         default={"azure:gpt-4o-mini": AgentIOModelArgs()},
         description="LLM configuration to use for translation",
     )
-    default_model: str | None = Field(
+    default_model: Optional[str] = Field(
         default="azure:gpt-4o-mini",
         description="Default arguments to LLM completion function by configured model.",
     )

@@ -4,7 +4,7 @@ import json
 import logging
 import re
 from abc import abstractmethod
-from typing import ClassVar
+from typing import ClassVar, Optional, Union
 
 import jsonschema
 from jinja2 import Environment
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AgentIOMapperInput(BaseIOMapperInput):
-    message_template: str | None = Field(
+    message_template: Union[str, None] = Field(
         max_length=4096,
         default=None,
         description="Message (user) to send to LLM to effect translation.",
@@ -52,9 +52,9 @@ class AgentIOMapper(BaseIOMapper):
 
     def __init__(
         self,
-        config: AgentIOMapperConfig | None = None,
-        jinja_env: Environment | None = None,
-        jinja_env_async: Environment | None = None,
+        config: Optional[AgentIOMapperConfig] = None,
+        jinja_env: Optional[Environment] = None,
+        jinja_env_async: Optional[Environment] = None,
     ):
         if config is None:
             config = AgentIOMapperConfig()
