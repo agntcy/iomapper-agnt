@@ -48,8 +48,14 @@ setup_test:
 
 test: setup_test
 	poetry run pytest -vvrx
+
 test_manifest: setup_test
 	poetry run pytest tests/test_agent_iomapper_from_manifest.py
 
 test_langgraph_agent: setup_test
 	poetry run pytest tests/test_langgraph_agent_iomapper.py
+
+test_langgraph_software: setup_test
+	poetry run pytest tests/test_langgraph_graph_with_io_mapper.py
+unittest:
+	poetry run pytest tests/unittests -vvrx

@@ -6,7 +6,7 @@ from typing import TypedDict
 import pytest
 from langgraph.graph import END, START, StateGraph
 
-from agntcy_iomapper.base import (
+from agntcy_iomapper.agent import (
     AgentIOMapperInput,
 )
 from agntcy_iomapper.langgraph import (

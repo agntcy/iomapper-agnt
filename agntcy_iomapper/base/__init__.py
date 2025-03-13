@@ -1,12 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
-from .agent_iomapper import (
-    AgentIOMapper,
-    AgentIOMapperConfig,
-    AgentIOMapperInput,
-    AgentIOMapperOutput,
-)
-from .base import (
+
+from agntcy_iomapper.base.base import (
     ArgumentsDescription,
     BaseIOMapper,
     BaseIOMapperConfig,
@@ -15,11 +10,7 @@ from .base import (
 )
 
 __all__ = [
-    "AgentIOMapperConfig",
     "ArgumentsDescription",
-    "AgentIOMapperInput",
-    "AgentIOMapperOutput",
-    "AgentIOMapper",
     "BaseIOMapperInput",
     "BaseIOMapperOutput",
     "BaseIOMapperConfig",

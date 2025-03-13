@@ -18,7 +18,7 @@ from pydantic_ai.models import KnownModelName
 from pydantic_ai.models.openai import OpenAIModel
 from typing_extensions import Self
 
-from agntcy_iomapper.base import (
+from agntcy_iomapper.agent import (
     AgentIOMapper,
     AgentIOMapperConfig,
     AgentIOMapperInput,
