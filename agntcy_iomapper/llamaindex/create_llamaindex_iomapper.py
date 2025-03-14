@@ -10,7 +10,7 @@ from openapi_pydantic import Schema
 from pydantic import BaseModel
 
 from agntcy_iomapper.base import AgentIOMapperInput, ArgumentsDescription
-from agntcy_iomapper.base.utils import _create_type_from_schema, _extract_nested_fields
+from agntcy_iomapper.base.utils import _extract_nested_fields, create_type_from_schema
 from agntcy_iomapper.llamaindex.llamaindex import (
     LLamaIndexIOMapper,
     LLamaIndexIOMapperConfig,
@@ -49,8 +49,12 @@ class IOMappingWorkflow(Workflow):
 
         if isinstance(data, BaseModel):
             input_data_schema = data.model_json_schema()
-            output_type = _create_type_from_schema(input_data_schema, output_fields)
-            input_type = _create_type_from_schema(input_data_schema, input_fields)
+            output_type = Schema.validate_model(
+                create_type_from_schema(input_data_schema, output_fields)
+            )
+            input_type = Schema.validate_model(
+                create_type_from_schema(input_data_schema, input_fields)
+            )
         else:
             # Read the optional fields
             input_schema = evt.get("input_schema", None)

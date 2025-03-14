@@ -6,7 +6,9 @@ from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
 from agntcy_iomapper.base import AgentIOMapperInput, ArgumentsDescription
-from agntcy_iomapper.base.utils import _create_type_from_schema, extract_nested_fields
+from agntcy_iomapper.base.utils import create_type_from_schema, extract_nested_fields
+
+from openapi_pydantic import Schema
 
 from .langgraph import (
     LangGraphIOMapper,
@@ -87,8 +89,12 @@ def io_mapper_node(data: Any, config: dict) -> Runnable:
         raise ValueError(
             "input_schema, and or output_schema are missing from the metadata, for a better accuracy you are required to provide them in this scenario"
         )
-    input_type = _create_type_from_schema(input_schema, input_fields)
-    output_type = _create_type_from_schema(output_schema, output_fields)
+    input_type = Schema.model_validate(
+        create_type_from_schema(input_schema, input_fields)
+    )
+    output_type = Schema.model_validate(
+        create_type_from_schema(output_schema, output_fields)
+    )
 
     data_to_be_mapped = extract_nested_fields(data, fields=input_fields)
 

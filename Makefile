@@ -53,3 +53,6 @@ test_manifest: setup_test
 
 test_langgraph_agent: setup_test
 	poetry run pytest tests/test_langgraph_agent_iomapper.py
+
+unittest:
+	poetry run pytest tests/unittests -vvrx

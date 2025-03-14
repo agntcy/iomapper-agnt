@@ -26,6 +26,9 @@ run_lg_eg_td: install
 run_llma_idx: install
 	$(PYTHON) llamaindex/llamaindex_workflow.py
 
+run_acp: install
+	$(PYTHON) acp/__main__.py
+
 
 
 clean:
