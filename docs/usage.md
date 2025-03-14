@@ -68,6 +68,121 @@ One of the supported platforms for managing the model interactions is [Pydantic-
 
 This project supports specifying model interations using [LangGraph](https://langchain-ai.github.io/langgraph/).
 
+## Use with Langgraph graph [Pydantic state]
+<table>
+    <tr>
+        <th>Field</th>
+        <th>Description</th>
+        <th>Required</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td>input_fields</td>
+        <td>an array of json paths </td>
+        <td>:white_check_mark:</td>
+<td>
+
+```["state.fiedl1", "state.field2", "state"]```            
+</td>
+    </tr>
+    <tr>
+        <td>output_fields</td>
+        <td>an array of json paths </td>
+        <td>:white_check_mark:</td>
+<td>
+
+```["state.output_fiedl1"]```
+</td>
+    </tr>
+    <tr>
+        <td>input_schema</td>
+        <td>defines the schema of the input data</td>
+        <td> :heavy_minus_sign: </td>
+        <td>
+            
+```json
+{ 
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "ingredients": {"type": "array", "items": {"type": "string"}},
+        "instructions": {"type": "string"},
+    },
+    "required": ["title", "ingredients, instructions"],
+}
+```
+<hr />
+OR
+
+```python
+from pydantic import TypeAdapter
+TypeAdapter(GraphState).json_schema()
+```
+</td>
+    </tr>
+    <tr>
+        <td>output_schema</td>
+        <td>defines the schema for the output data</td>
+        <td>:heavy_minus_sign:</td>
+        <td>same as input_schema</td>
+    </tr>
+    <tr>
+        <td>output_template</td>
+        <td>a prompt follwoing jinja template</td>
+        <td>:heavy_minus_sign:</td>
+        <td>
+    
+```python
+"""Return the output as a JSON object with the following structure:
+{{
+"name": "Campaign Name",
+"content": "Campaign Content",
+"is_urgent": yes/no
+}}
+"""
+```
+</td>
+</tr>
+</table>
+
+In langgraph you can used with states typed as ```python TypedDict``` or our recommended way with ```python Pydantic```.
+We will show two examples of how to add the io mapper in a langgraph graph. We assume you have a langgraph graph created therefore the steps of how the graph is created is ommited.
+```python
+from agntcy_iomapper.langgraph import (
+    io_mapper_node,
+)
+```
+Users can easily specify the input fields that needs to be translated and the expected output fields 
+```python
+workflow.add_node(
+    "io_mapping",
+    io_mapper_node,
+    metadata={
+        "input_fields": ["selected_users", "campaign_details.name"],
+        "output_fields": ["stats.status"],
+    },
+)
+```
+:warning: The configurations needed by the io mapper node must be passed in the metadata dictionary when adding the node
+
+This instruction tells the io mapper agent to use ```selected_users ``` and ```name``` from ```campaign_details``` field the langgraph stat
+```python
+workflow.add_edge("create_communication", "io_mapping")
+workflow.add_edge("io_mapping", "send_communication")
+```
+Here is a flow chart of io mapper in a langgraph graph of the discussed application
+```mermaid
+flowchart TD
+    A[create_communication] -->|input in specific format| B(IO Mapper Agent)
+    B -->|output expected format| D[send_communication]
+```
+:warning: Very important to set the llm instance to be used by the iomapper agent, in the runnable config with the key llm before you invoke the graph
+```python
+config = RunnableConfig(configurable={"llm": llm})
+app.invoke(inputs, config)
+```
+
+
 ## Use Imperative / Deterministic IO Mapper
 
 The code snippet below illustrates a fully functional deterministic mapping that
