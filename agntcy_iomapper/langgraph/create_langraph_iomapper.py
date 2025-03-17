@@ -29,8 +29,7 @@ def create_langraph_iomapper(
     """
     return LangGraphIOMapper(config).as_runnable()
 
-
-def io_mapper_node(data: Any, config: dict) -> Runnable:
+def get_langgraph_io_mapper(data: Any, config:dict, metadata:dict=None):
     """Creates a langgraph node
     Args:
       data: represents the state of the graph
@@ -44,7 +43,8 @@ def io_mapper_node(data: Any, config: dict) -> Runnable:
     Returns:
       A runnable, that can be included in the langgraph node
     """
-    metadata = config.get("metadata", None)
+    if not metadata:
+        metadata = config.get("metadata", None)
     if not metadata:
         return ValueError(
             "A metadata must be present with at least the configuration for input_fields and output_fields"
@@ -110,4 +110,7 @@ def io_mapper_node(data: Any, config: dict) -> Runnable:
     )
 
     iomapper_config = LangGraphIOMapperConfig(llm=llm)
-    return LangGraphIOMapper(iomapper_config, input).as_runnable()
+    return LangGraphIOMapper(iomapper_config, input)
+
+def io_mapper_node(data: Any, config: dict) -> Runnable:
+    return get_langgraph_io_mapper(data, config).as_runnable()
