@@ -6,7 +6,7 @@ import pytest
 from deepdiff import diff
 from jinja2.sandbox import SandboxedEnvironment
 
-from agntcy_iomapper import AgentIOMapper
+from agntcy_iomapper.agent import AgentIOMapper
 from agntcy_iomapper.pydantic_ai import (
     AgentIOModelArgs,
     AgentModelSettings,

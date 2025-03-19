@@ -9,8 +9,8 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 from pydantic import Field
 
-from agntcy_iomapper.base import (
-    AgentIOMapper,
+from agntcy_iomapper.agent.base import AgentIOMapper
+from agntcy_iomapper.agent.models import (
     AgentIOMapperConfig,
     AgentIOMapperInput,
     AgentIOMapperOutput,

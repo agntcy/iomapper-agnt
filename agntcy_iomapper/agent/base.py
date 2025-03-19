@@ -1,48 +1,25 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
+
+
 import json
 import logging
 import re
 from abc import abstractmethod
-from typing import ClassVar, Optional, Union
+from typing import ClassVar, Optional
 
 import jsonschema
 from jinja2 import Environment
 from jinja2.sandbox import SandboxedEnvironment
-from pydantic import Field
 
-from .base import (
-    BaseIOMapper,
-    BaseIOMapperConfig,
-    BaseIOMapperInput,
-    BaseIOMapperOutput,
+from agntcy_iomapper.agent.models import (
+    AgentIOMapperConfig,
+    AgentIOMapperInput,
+    AgentIOMapperOutput,
 )
+from agntcy_iomapper.base import BaseIOMapper
 
 logger = logging.getLogger(__name__)
-
-
-class AgentIOMapperInput(BaseIOMapperInput):
-    message_template: Union[str, None] = Field(
-        max_length=4096,
-        default=None,
-        description="Message (user) to send to LLM to effect translation.",
-    )
-
-
-AgentIOMapperOutput = BaseIOMapperOutput
-
-
-class AgentIOMapperConfig(BaseIOMapperConfig):
-    system_prompt_template: str = Field(
-        max_length=4096,
-        default="You are a translation machine. You translate both natural language and object formats for computers.",
-        description="System prompt Jinja2 template used with LLM service for translation.",
-    )
-    message_template: str = Field(
-        max_length=4096,
-        default="The input is described {% if input.json_schema %}by the following JSON schema: {{ input.json_schema.model_dump(exclude_none=True) }}{% else %}as {{ input.description }}{% endif %}, and the output is described {% if output.json_schema %}by the following JSON schema: {{ output.json_schema.model_dump(exclude_none=True) }}{% else %}as {{ output.description }}{% endif %}. The data to translate is: {{ data }}",
-        description="Default user message template. This can be overridden by the message request.",
-    )
 
 
 class AgentIOMapper(BaseIOMapper):

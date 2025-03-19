@@ -8,9 +8,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
-from agntcy_iomapper.langgraph import (
-    io_mapper_node,
-)
+from agntcy_iomapper import IOMappingAgent, IOMappingAgentMetadata
 from examples.llm import get_azure
 from examples.models import Campaign, Communication, Statistics, User
 from examples.models.data import users
@@ -89,14 +87,16 @@ workflow.add_node("select_users", select_user_node)
 workflow.add_node("create_campaign", define_campaign_node)
 workflow.add_node("create_communication", create_communication)
 
-workflow.add_node(
-    "io_mapping",
-    io_mapper_node,
-    metadata={
-        "input_fields": ["selected_users", "campaign_details.name"],
-        "output_fields": ["stats.status"],
-    },
+llm = get_azure()
+
+metadata = IOMappingAgentMetadata(
+    input_fields=["selected_users", "campaign_details.name"],
+    output_fields=["stats.status"],
 )
+
+mapping_agent = IOMappingAgent(metadata=metadata, llm=llm)
+
+workflow.add_node("io_mapping", mapping_agent.langgraph_node)
 
 workflow.add_edge("select_users", "create_campaign")
 workflow.add_edge("create_campaign", "create_communication")
@@ -106,7 +106,6 @@ workflow.add_edge("io_mapping", END)
 
 app = workflow.compile()
 
-llm = get_azure()
 config = RunnableConfig(configurable={"llm": llm})
 inputs = {"user_prompt": "Create a campaign for all users"}
 

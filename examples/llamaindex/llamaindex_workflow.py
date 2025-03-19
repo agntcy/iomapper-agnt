@@ -78,26 +78,6 @@ class CampaignWorkflow(Workflow):
                     "selected_users": ev.list_users,
                 },
                 input_fields=["selected_users", "campaign_details.name"],
-                input_schema=TypeAdapter(OverallState).json_schema(),
-                output_schema={
-                    "type": "object",
-                    "properties": {
-                        "stats": {
-                            "type": "object",
-                            "properties": {
-                                "status": {
-                                    "type": "string",
-                                    "description": "returns sent or pending depending if users were selected",
-                                },
-                                "message": {
-                                    "type": "string",
-                                    "description": "a message indicating if campaign was sent",
-                                },
-                            },
-                        }
-                    },
-                    "required": ["title", "ingredients, instructions"],
-                },
                 output_fields=["stats"],
             )
             return StopEvent(result=result)

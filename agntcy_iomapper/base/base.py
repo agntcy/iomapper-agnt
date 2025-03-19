@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC, abstractmethod
-from typing import Any, Union, Optional
+from typing import Any, Optional
 
 from openapi_pydantic import Schema
 from pydantic import BaseModel, Field, model_validator
@@ -18,7 +18,7 @@ class ArgumentsDescription(BaseModel):
         default=None, description="Data format JSON schema"
     )
     description: Optional[str] = Field(
-        default=None, description="Data (semantic) natural language description"
+        default="", description="Data (semantic) natural language description"
     )
     agent_manifest: Optional[dict[str, Any]] = Field(
         default=None,

@@ -1,4 +1,3 @@
-import os
 from typing import List, TypedDict, Union
 
 from langchain.schema import Document
@@ -8,7 +7,10 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from pydantic import TypeAdapter
 
-from agntcy_iomapper.langgraph import io_mapper_node
+from agntcy_iomapper import (
+    IOMappingAgent,
+    IOMappingAgentMetadata,
+)
 from examples.llm import get_azure
 from examples.models import RecipeQuery, RecipeResponse
 
@@ -43,7 +45,6 @@ def retrieve_recipe(state: GraphState) -> GraphState:
 def format_recipe(state: GraphState) -> GraphState:
     """Formats the recipe for user display."""
     recipe: RecipeResponse = state["recipe"]
-    print(recipe)
     title = recipe.get("title", "")
     ingredients = recipe.get("ingredients", [])
     instructions = recipe.get("instructions", "")
@@ -55,34 +56,39 @@ def format_recipe(state: GraphState) -> GraphState:
 
 
 graph = StateGraph(GraphState)
-graph.add_node("retrieve", retrieve_recipe)
+graph.add_node("recipe_expert", retrieve_recipe)
+
+metadata = IOMappingAgentMetadata(
+    input_fields=["documents.0.page_content"],
+    output_fields=["recipe"],
+    input_schema=TypeAdapter(GraphState).json_schema(),
+    output_schema={
+        "type": "object",
+        "properties": {
+            "title": {"type": "string"},
+            "ingredients": {"type": "array", "items": {"type": "string"}},
+            "instructions": {"type": "string"},
+        },
+        "required": ["title", "ingredients, instructions"],
+    },
+)
+
+llm = get_azure()
+
+mapping_agent = IOMappingAgent(metadata=metadata, llm=llm)
+
 graph.add_node(
     "recipe_io_mapper",
-    io_mapper_node,
-    metadata={
-        "input_fields": ["documents.0.page_content"],
-        "input_schema": TypeAdapter(GraphState).json_schema(),
-        "output_schema": {
-            "type": "object",
-            "properties": {
-                "title": {"type": "string"},
-                "ingredients": {"type": "array", "items": {"type": "string"}},
-                "instructions": {"type": "string"},
-            },
-            "required": ["title", "ingredients, instructions"],
-        },
-        "output_fields": ["recipe"],
-    },
+    mapping_agent.langgraph_node,
 )
 graph.add_node("format", format_recipe)
 
-graph.add_edge("retrieve", "recipe_io_mapper")
+graph.add_edge("recipe_expert", "recipe_io_mapper")
 graph.add_edge("recipe_io_mapper", "format")
 graph.add_edge("format", END)
 
-graph.set_entry_point("retrieve")
+graph.set_entry_point("recipe_expert")
 
-llm = get_azure()
 config = RunnableConfig(configurable={"llm": llm})
 app = graph.compile()
 

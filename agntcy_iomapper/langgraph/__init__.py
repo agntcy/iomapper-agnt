@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0"
 
-from .create_langraph_iomapper import create_langraph_iomapper, io_mapper_node
-from .langgraph import (
+from agntcy_iomapper.langgraph.create_langraph_iomapper import (
+    create_langraph_iomapper,
+)
+from agntcy_iomapper.langgraph.langgraph import (
     LangGraphIOMapper,
     LangGraphIOMapperConfig,
     LangGraphIOMapperInput,
@@ -11,7 +13,6 @@ from .langgraph import (
 
 __all__ = [
     "create_langraph_iomapper",
-    "io_mapper_node",
     "LangGraphIOMapper",
     "LangGraphIOMapperConfig",
     "LangGraphIOMapperInput",

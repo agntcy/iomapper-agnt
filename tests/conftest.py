@@ -21,4 +21,14 @@ def llm_iomapper_config() -> LangGraphIOMapperConfig:
     )
 
 
+@pytest.fixture
+def llm_instance() -> AzureChatOpenAI:
+    return AzureChatOpenAI(
+        model="gpt-4o-mini",
+        api_version="2024-07-01-preview",
+        seed=42,
+        temperature=0,
+    )
+
+
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
