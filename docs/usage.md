@@ -1,72 +1,231 @@
 # Usage
 
-The Agntcy IO Mapper functions provided an easy to use package for mapping output from
-one agent to another. The data can be described in JSON or with natural language. The
-(incomplete) [pydantic](https://docs.pydantic.dev/latest/) models follow:
-
-```python
-class ArgumentsDescription(BaseModel):
-    json_schema: Schema | None = Field(description="Data format JSON schema")
-    description: str | None = Field(description="Data (semantic) natural language description")
-
-class BaseIOMapperInput(BaseModel):
-    input: ArgumentsDescription = Field(description="Input data descriptions")
-    output: ArgumentsDescription = Field(description="Output data descriptions")
-    data: Any = Field(description="Data to translate")
-
-class BaseIOMapperOutput(BaseModel):
-    data: Any = Field(description="Data after translation")
-    error: str | None = Field(description="Description of error on failure.")
-
-class BaseIOMapperConfig(BaseModel):
-    validate_json_input: bool = Field(description="Validate input against JSON schema.")
-    validate_json_output: bool = Field(description="Validate output against JSON schema.")
-```
-
 There are several different ways to leverage the IO Mapper functions in Python. There
 is an [agentic interface](#use-agent-io-mapper) using models that can be invoked on
 different AI platforms and a [imperative interface](#use-imperative--deterministic-io-mapper)
 that does deterministic JSON remapping without using any AI models.
 
-## Use Agent IO Mapper
+## Key features
 
 The Agent IO Mapper uses an LLM/model to transform the inputs (typically output of the
 first agent) to match the desired output (typically the input of a second agent). As such,
 it additionally supports specifying the model prompts for the translation. The configuration
 object provides a specification for the system and default user prompts:
 
-```python
-class AgentIOMapperConfig(BaseIOMapperConfig):
-    system_prompt_template: str = Field(
-        description="System prompt Jinja2 template used with LLM service for translation."
-    )
-    message_template: str = Field(
-        description="Default user message template. This can be overridden by the message request."
-    )
-```
+## Example Agent IO mapping
 
-and the input object supports overriding the user prompt for the requested translation:
-
-```python
-class AgentIOMapperInput(BaseIOMapperInput):
-    message_template: str | None = Field(
-        description="Message (user) to send to LLM to effect translation.",
-    )
-```
-
-Further specification of models and their arguments is left to the underlying supported
-packages:
-
-- [Pydantic-AI](#pydantic-ai)
-- [LangGraph](#langgraph)
-
-### Pydantic-AI
-
-One of the supported platforms for managing the model interactions is [Pydantic-AI](https://ai.pydantic.dev/).
-
-### LangGraph
-
+#### LangGraph Example 1
 This project supports specifying model interations using [LangGraph](https://langchain-ai.github.io/langgraph/).
+
+### Define an agent io mapper metadata
+```python
+metadata = IOMappingAgentMetadata(
+    input_fields=["selected_users", "campaign_details.name"],
+    output_fields=["stats.status"],
+)
+
+```
+The abobe instruction directs the IO mapper agent to utilize the ```selected_users``` and ```name``` from the ```campaign_details``` field and map them to the ```stats.status```. Here is an example to illustrate this further. No further information is needed since the type information can be derived from the input data which is a pydantic model.
+
+Bellow is a table that explain each fields of the IOMappingAgentMetadata class and how to use each
+
+<table>
+    <tr>
+        <th>Field</th>
+        <th>Description</th>
+        <th>Required</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td>input_fields</td>
+        <td>an array of json paths </td>
+        <td>:white_check_mark:</td>
+<td>
+
+```["state.fiedl1", "state.field2", "state"]```            
+</td>
+    </tr>
+    <tr>
+        <td>output_fields</td>
+        <td>an array of json paths </td>
+        <td>:white_check_mark:</td>
+<td>
+
+```["state.output_fiedl1"]```
+</td>
+    </tr>
+    <tr>
+        <td>input_schema</td>
+        <td>defines the schema of the input data</td>
+        <td> :heavy_minus_sign: </td>
+        <td>
+            
+```json
+{ 
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "ingredients": {"type": "array", "items": {"type": "string"}},
+        "instructions": {"type": "string"},
+    },
+    "required": ["title", "ingredients, instructions"],
+}
+```
+<hr />
+OR
+
+```python
+from pydantic import TypeAdapter
+TypeAdapter(GraphState).json_schema()
+```
+</td>
+    </tr>
+    <tr>
+        <td>output_schema</td>
+        <td>defines the schema for the output data</td>
+        <td>:heavy_minus_sign:</td>
+        <td>same as input_schema</td>
+    </tr>
+    <tr>
+        <td>output_description_prompt</td>
+        <td>A prompt structured using a Jinja template that can be used by the llm in the mapping definition</td>
+        <td>:heavy_minus_sign:</td>
+        <td>
+    
+```python
+"""Output as JSON with this structure:
+{{
+"name": "Campaign Name",
+"content": "Campaign Content",
+"is_urgent": "yes/no"
+}}
+"""
+```
+</td>
+</tr>
+</table>
+
+### Define an Instance of the Agent 
+```python
+mapping_agent = IOMappingAgent(metadata=metadata, llm=llm)
+ ```
+Bellow is the tablex explaining the interface of the IOMappingAgent class
+<table>
+    <tr>
+        <th>Field</th>
+        <th>Description</th>
+        <th>Required</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td>metadata</td>
+        <td></td>
+        <td>:white_check_mark:</td>
+<td>
+            
+```python
+IOMappingAgentMetadata(
+    input_fields=["documents.0.page_content"],
+    output_fields=["recipe"],
+    input_schema=TypeAdapter(GraphState).json_schema(),
+    output_schema={
+        "type": "object",
+        "properties": {
+            "title": {"type": "string"},
+            "ingredients": {"type": "array", "items": {"type": "string"}},
+            "instructions": {"type": "string"},
+        },
+        "required": ["title", "ingredients, instructions"],
+    },
+)
+```
+ </td>
+</tr>
+
+<tr>
+    <td>llm</td>
+    <td>An instance of the large language model to be used</td>
+    <td>:white_check_mark:</td>
+<td>
+    
+```python
+        AzureChatOpenAI(
+            model=model_version,
+            api_version=api_version,
+            seed=42,
+            temperature=0,
+        )
+```
+</td>
+</tr>
+</table>
+
+
+### Add the node to the LangGraph graph 
+```python
+workflow.add_node(
+    "io_mapping",
+    mapping_agent.langgraph_node,
+)
+```
+
+### Finally add the edge and you can run the your LangGraph graph
+```python
+workflow.add_edge("create_communication", "io_mapping")
+workflow.add_edge("io_mapping", "send_communication")
+```
+Here is a flow chart of io mapper in a langgraph graph of the discussed application
+```mermaid
+flowchart TD
+    A[create_communication] -->|input in specific format| B(IO Mapper Agent)
+    B -->|output expected format| D[send_communication]
+```
+
+#### LangGraph Example 2
+This example involves a multi-agent software system designed to process a list of ingredients. It interacts with an agent specialized in recipe books to identify feasible recipes based on the provided ingredients. The information is then relayed to an IO mapper, which converts it into a format suitable for display to the user.
+
+### Define an agent io mapper metadata
+
+```python
+metadata = IOMappingAgentMetadata(
+    input_fields=["documents.0.page_content"],
+    output_fields=["recipe"],
+    input_schema=TypeAdapter(GraphState).json_schema(),
+    output_schema={
+        "type": "object",
+        "properties": {
+            "title": {"type": "string"},
+            "ingredients": {"type": "array", "items": {"type": "string"}},
+            "instructions": {"type": "string"},
+        },
+        "required": ["title", "ingredients, instructions"],
+    },
+)
+```
+
+### Define an Instance of the Agent 
+```python
+mapping_agent = IOMappingAgent(metadata=metadata, llm=llm)
+```
+
+### Add the node to the LangGraph graph
+```python
+graph.add_node(
+    "recipe_io_mapper",
+    mapping_agent.langgraph_node,
+)
+```
+
+### Finally add the edge and you can run the your LangGraph graph
+```
+graph.add_edge("recipe_expert", "recipe_io_mapper")
+```
+
+#### LlamaIndex
+This project supports specifying model interations using [LangGraph](https://langchain-ai.github.io/langgraph/).
+
+
+### LlamaIndex AgentWorkflow
 
 ## Use Imperative / Deterministic IO Mapper
 
@@ -106,11 +265,11 @@ agents is omitted.
      data={"question": output_prof},
  )
  # instantiate the mapper
- imerative_mapp = ImperativeIOMapper(
+ imperative_mapp = ImperativeIOMapper(
      field_mapping=mapping_object,
  )
  # get the mapping result and send to the other agent
- mapping_result = imerative_mapp.invoke(input=input)
+ mapping_result = imperative_mapp.invoke(input=input)
 ```
 
 ### Use Examples
