@@ -43,7 +43,7 @@ jobs:
           PYPROJECT_VERSION=$(awk '/version/ { gsub("\"", ""); print $3; exit; }' pyproject.toml)
       
           if [ ! "${PYPROJECT_VERSION}" = "${TAG}" ]; then
-              echo "You created the \"${{ github.ref_name }}\"" git tag; it is fine, BUT it does not match the pyproject.toml file"
+              echo "You created the \"${{ github.ref_name }}\" git tag; it is fine, BUT it does not match the pyproject.toml file"
               exit 1
           fi
 
