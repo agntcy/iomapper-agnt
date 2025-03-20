@@ -18,7 +18,7 @@ class ArgumentsDescription(BaseModel):
         default=None, description="Data format JSON schema"
     )
     description: Optional[str] = Field(
-        default="", description="Data (semantic) natural language description"
+        default=None, description="Data (semantic) natural language description"
     )
     agent_manifest: Optional[dict[str, Any]] = Field(
         default=None,

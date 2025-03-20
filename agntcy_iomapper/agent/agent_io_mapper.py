@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from typing import Any, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import Runnable
@@ -10,7 +10,11 @@ from openapi_pydantic import Schema
 from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
 
-from agntcy_iomapper.agent.models import AgentIOMapperInput, IOMappingAgentMetadata
+from agntcy_iomapper.agent.models import (
+    AgentIOMapperInput,
+    FieldMetadata,
+    IOMappingAgentMetadata,
+)
 from agntcy_iomapper.base import ArgumentsDescription
 from agntcy_iomapper.base.utils import create_type_from_schema, extract_nested_fields
 from agntcy_iomapper.langgraph import LangGraphIOMapper, LangGraphIOMapperConfig
@@ -19,25 +23,28 @@ logger = logging.getLogger(__name__)
 
 
 class IOMappingAgent(BaseModel):
-    llm: Union[BaseChatModel, str] = (
-        Field(
-            ...,
-            description="Model to use for translation as LangChain description or model class.",
-        ),
-    )
     metadata: IOMappingAgentMetadata = Field(
         ...,
         description="Details about the fields to be used in the translation and about the output",
+    )
+    llm: Optional[Union[BaseChatModel, str]] = (
+        Field(
+            None,
+            description="Model to use for translation as LangChain description or model class.",
+        ),
     )
 
     @model_validator(mode="after")
     def _validate_obj(self) -> Self:
 
-        if not self.metadata.input_fields:
+        if not self.metadata.input_fields or len(self.metadata.input_fields) == 0:
             raise ValueError("input_fields not found in the metadata")
         # input fields must have a least one non empty string
         valid_input = [
-            field for field in self.metadata.input_fields if len(field.strip()) > 0
+            field
+            for field in self.metadata.input_fields
+            if (isinstance(field, str) and len(field.strip()) > 0)
+            or (isinstance(field, FieldMetadata) and len(field.json_path.strip()) > 0)
         ]
 
         if not len(valid_input):
@@ -48,19 +55,18 @@ class IOMappingAgent(BaseModel):
         if not self.metadata.output_fields:
             raise ValueError("output_fields not found in the metadata")
 
-        # outpu fields must have a least one non empty string
+        # output fields must have a least one non empty string
         valid_output = [
-            field for field in self.metadata.output_fields if len(field.strip()) > 0
+            field
+            for field in self.metadata.output_fields
+            if (isinstance(field, str) and len(field.strip()) > 0)
+            or (isinstance(field, FieldMetadata) and len(field.json_path.strip()) > 0)
         ]
+
         if not len(valid_output):
             raise ValueError("output_fields must have at least one field")
         else:
             self.metadata.output_fields = valid_output
-
-        if not self.llm:
-            raise ValueError(
-                "to use io_mapper_node an llm config must be passed via langgraph runnable config"
-            )
 
         return self
 
@@ -92,10 +98,9 @@ class IOMappingAgent(BaseModel):
 
         return (input_type, output_type)
 
-    def langgraph_node(self, data: Any) -> Runnable:
+    def langgraph_node(self, data: Any, config: Optional[dict] = None) -> Runnable:
 
         # If there is a template for the output the output_schema is going to be ignored in the translation
-        output_template = self.metadata.output_description_prompt
         input_type, output_type = self._get_io_types(data)
 
         data_to_be_mapped = extract_nested_fields(
@@ -106,11 +111,24 @@ class IOMappingAgent(BaseModel):
             input=ArgumentsDescription(
                 json_schema=input_type,
             ),
-            output=ArgumentsDescription(
-                json_schema=output_type, description=output_template
-            ),
+            output=ArgumentsDescription(json_schema=output_type),
             data=data_to_be_mapped,
         )
+
+        if not self.llm and config:
+            configurable = config.get("configurable", None)
+            if configurable is None:
+                raise ValueError("llm instance not provided")
+
+            llm = configurable.get("llm", None)
+
+            if llm is None:
+                raise ValueError("llm instance not provided")
+
+            self.llm = llm
+
+        if not self.llm:
+            raise ValueError("llm instance not provided")
 
         iomapper_config = LangGraphIOMapperConfig(llm=self.llm)
         return LangGraphIOMapper(iomapper_config, input).as_runnable()

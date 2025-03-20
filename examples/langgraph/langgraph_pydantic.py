@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
-from agntcy_iomapper import IOMappingAgent, IOMappingAgentMetadata
+from agntcy_iomapper import FieldMetadata, IOMappingAgent, IOMappingAgentMetadata
 from examples.llm import get_azure
 from examples.models import Campaign, Communication, Statistics, User
 from examples.models.data import users
@@ -21,7 +21,7 @@ class OverallState(BaseModel):
         None, description="Details of the created campaign."
     )
     stats: Optional[Statistics] = Field(
-        None, description="Statistics for the running campaign"
+        None, description="status and information related to the campaign"
     )
 
 
@@ -90,8 +90,16 @@ workflow.add_node("create_communication", create_communication)
 llm = get_azure()
 
 metadata = IOMappingAgentMetadata(
-    input_fields=["selected_users", "campaign_details.name"],
-    output_fields=["stats.status"],
+    input_fields=[
+        FieldMetadata(
+            json_path="selected_users", description="A list of users to be targeted"
+        ),
+        FieldMetadata(
+            json_path="campaign_details.name",
+            description="The name that can be used by the campaign",
+        ),
+    ],
+    output_fields=["stats"],
 )
 
 mapping_agent = IOMappingAgent(metadata=metadata, llm=llm)

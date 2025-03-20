@@ -155,6 +155,7 @@ class AgentIOMapper(BaseIOMapper):
         )
         logging.debug(f"The LLM returned: {outputs}")
         output = self._get_output(input, outputs)
+
         self._validate_output(input, output)
         return output
 

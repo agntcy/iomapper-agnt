@@ -33,7 +33,7 @@ setup_sanity:
 	poetry install --only sanity --no-root
 
 set_python_env:
-	poetry env use python3.12
+	poetry env use python3.9
 
 setup_check: set_python_env setup_sanity
 	poetry run mypy --config-file ../../.rules/mypy.ini --install-types --non-interactive ./$(PROJECT_NAME) || echo "Ignoring mypy failure"

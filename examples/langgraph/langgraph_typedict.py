@@ -7,10 +7,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from pydantic import TypeAdapter
 
-from agntcy_iomapper import (
-    IOMappingAgent,
-    IOMappingAgentMetadata,
-)
+from agntcy_iomapper import FieldMetadata, IOMappingAgent, IOMappingAgentMetadata
 from examples.llm import get_azure
 from examples.models import RecipeQuery, RecipeResponse
 
@@ -60,7 +57,12 @@ graph.add_node("recipe_expert", retrieve_recipe)
 
 metadata = IOMappingAgentMetadata(
     input_fields=["documents.0.page_content"],
-    output_fields=["recipe"],
+    output_fields=[
+        FieldMetadata(
+            json_path="recipe",
+            description="this is a recipe for the ingredients you've provided",
+        )
+    ],
     input_schema=TypeAdapter(GraphState).json_schema(),
     output_schema={
         "type": "object",

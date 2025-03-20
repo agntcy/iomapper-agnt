@@ -7,6 +7,7 @@ from agntcy_iomapper.agent.models import (
     AgentIOMapperConfig,
     AgentIOMapperInput,
     AgentIOMapperOutput,
+    FieldMetadata,
     IOMappingAgentMetadata,
 )
 
@@ -17,4 +18,5 @@ __all__ = [
     "IOMappingAgent",
     "IOMappingAgentMetadata",
     "AgentIOMapperInput",
+    "FieldMetadata",
 ]
