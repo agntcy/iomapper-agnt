@@ -1,7 +1,6 @@
 # IO-Mapper Agent
 
-[![Release](https://img.shields.io/github/v/release/agntcy/iomapper-agnt?display_name=tag)](CHANGELOG.md)
-[![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](CODE_OF_CONDUCT.md)
+[![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](https://github.com/agntcy/acp-sdk/blob/main/CODE_OF_CONDUCT.md)
 
 ## About The Project
 
@@ -44,18 +43,18 @@ To get a local copy up and running follow these simple steps.
 ## Usage
 
 Learn how to use our different Mappers
-[USAGE.md](_usage.md)
+[USAGE.md](https://agntcy.github.io/iomapper-agnt/#_usage.md)
 
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to
 learn, inspire, and create. Any contributions you make are **greatly
 appreciated**. For detailed contributing guidelines, please see
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/agntcy/acp-sdk/blob/main/docs/CONTRIBUTING.md)
 
 ## Copyright Notice and License
 
-[Copyright Notice and License](./LICENSE)
+[Copyright Notice and License](https://github.com/agntcy/acp-sdk/blob/main/LICENSE)
 
 Copyright (c) 2025 Cisco and/or its affiliates.
 

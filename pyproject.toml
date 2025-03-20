@@ -1,16 +1,14 @@
 [project]
 name = "agntcy-iomapper"
-version = "0.2.0"
+version = "0.2.0a0"
 license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
 authors = [
-  { name = "Jeff Napper", email = "jenapper@cisco.com" },
-  { name = "Reginaldo Costa", email = "regcosta@cisco.com" },
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 maintainers = [
-  { name = "Jeff Napper", email = "jenapper@cisco.com" },
-  { name = "Reginaldo Costa", email = "regcosta@cisco.com" },
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 
 [tool.poetry.dependencies]
