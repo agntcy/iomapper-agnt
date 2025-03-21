@@ -28,8 +28,8 @@ llama-index = "^0.12.20"
 jsonref = "^1.1.0"
 
 [tool.poetry.extras]
-langgraph = [ "langchain", "langgraph", "langchain-openai" ]
-pydantic-ai = [ "pydantic-ai" ]
+langgraph = ["langchain", "langgraph", "langchain-openai"]
+pydantic-ai = ["pydantic-ai"]
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"

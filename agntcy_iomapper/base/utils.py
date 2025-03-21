@@ -1,15 +1,17 @@
 import copy
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 import jsonref
+
+from agntcy_iomapper.agent.models import FieldMetadata
 
 logger = logging.getLogger(__name__)
 
 
 def create_type_from_schema(
-    json_schema: Dict[str, Any], json_paths: List[str]
+    json_schema: Dict[str, Any], json_paths: List[Union[str, FieldMetadata]]
 ) -> Optional[Type]:
     """
     Creates a new model with only the specified fields from a JSON schema.
@@ -31,15 +33,30 @@ def create_type_from_schema(
     curr_path_schema = {}
 
     for path in json_paths:
-        parts = path.split(".")
+        curr_path = path if isinstance(path, str) else path.json_path
+        field_description = None if isinstance(path, str) else path.description
+        field_examples = None if isinstance(path, str) else path.examples
+
+        parts = curr_path.split(".")
         curr_key = parts[0]
+
+        if curr_key.isdigit():
+            continue
+
         curr_path_schema.clear()
 
         if curr_key in properties:
             # perform a deepcopy to keep original properties intact
             curr_object_def = copy.deepcopy(properties.get(curr_key))
 
-            curr_path_schema[curr_key] = curr_object_def
+            curr_path_schema[curr_key] = copy.deepcopy(curr_object_def)
+
+            if len(parts) == 1:
+                if field_description:
+                    curr_path_schema[curr_key]["description"] = field_description
+                if field_examples:
+                    curr_path_schema[curr_key]["examples"] = field_examples
+
             if "anyOf" in curr_object_def:
                 sub_schemas = curr_object_def.get("anyOf")
 
@@ -47,33 +64,55 @@ def create_type_from_schema(
                     if "properties" in sub_schema:
                         _props = sub_schema.get("properties", {})
                         curr_path_schema[curr_key]["anyOf"][i]["properties"] = (
-                            _get_properties(1, parts, _props, flatten_json)
+                            _get_properties(
+                                1,
+                                parts,
+                                _props,
+                                flatten_json,
+                                field_description,
+                                field_examples,
+                            )
                         )
                     elif "items" in sub_schema:
                         _curr_items = curr_object_def.get("items", {})
                         curr_path_schema[curr_key]["anyOf"][i]["items"] = (
-                            _get_properties(1, parts, _curr_items, flatten_json)
+                            _get_properties(
+                                1,
+                                parts,
+                                _curr_items,
+                                flatten_json,
+                                field_description,
+                                field_examples,
+                            )
                         )
 
             if "properties" in curr_object_def:
                 props = curr_object_def.get("properties", {})
                 curr_path_schema[curr_key]["properties"] = _get_properties(
-                    1, parts, props, flatten_json
+                    1, parts, props, flatten_json, field_description, field_examples
                 )
             elif "items" in curr_object_def:
                 curr_items = curr_object_def.get("items", {})
                 curr_path_schema[curr_key]["items"] = _get_properties(
-                    1, parts, curr_items, flatten_json
+                    1,
+                    parts,
+                    curr_items,
+                    flatten_json,
+                    field_description,
+                    field_examples,
                 )
 
         else:
             curr_path_schema[curr_key] = {"type": "object", "properties": {}}
             if len(parts) == 1:
                 curr_path_schema[curr_key]["properties"] = flatten_json
+                if field_description:
+                    curr_path_schema[curr_key]["description"] = field_description
             else:
                 curr_path_schema[curr_key]["properties"] = _get_properties(
-                    1, parts, {}, flatten_json
+                    1, parts, {}, flatten_json, field_description, field_examples
                 )
+
         if curr_key not in filtered_properties:
             filtered_properties[curr_key] = copy.deepcopy(curr_path_schema[curr_key])
         else:
@@ -124,34 +163,59 @@ def _merge_paths(d1: dict, d2: dict):
     return merged
 
 
-def _get_properties(level, parts, props, json_schema):
+def _get_properties(
+    level, parts, props, json_schema, field_description, field_examples
+):
+
     if level >= len(parts):
         return props
 
     curr_key = parts[level]
-    if level >= len(parts) - 1 and len(props) == 0:
-        return {curr_key: json_schema}
 
     if curr_key in props:
         curr_obj = props.get(curr_key)
-
         if "properties" in curr_obj:
             curr_properties = curr_obj.get("properties", {})
             curr_obj["properties"] = _get_properties(
-                level + 1, parts, curr_properties, json_schema
+                level + 1,
+                parts,
+                curr_properties,
+                json_schema,
+                field_description,
+                field_examples,
             )
+
         elif "items" in curr_obj:
             curr_properties = curr_obj.get("items", {})
             curr_obj["items"] = _get_properties(
-                level + 1, parts, curr_properties, json_schema
+                level + 1,
+                parts,
+                curr_properties,
+                json_schema,
+                field_description,
+                field_examples,
             )
         elif "anyOf" in curr_obj:
             sub_schemas = curr_obj.get("anyOf")
             anyOfs = []
             for sub_schema in sub_schemas:
-                s = _get_properties(level + 2, parts, sub_schema, json_schema)
+                s = _get_properties(
+                    level + 1,
+                    parts,
+                    sub_schema,
+                    json_schema,
+                    field_description,
+                    field_examples,
+                )
                 anyOfs.append(s)
+
             curr_obj["anyOf"] = anyOfs
+
+        if level == len(parts) - 1:
+            if field_description:
+                curr_obj["description"] = field_description
+            if field_examples:
+                curr_obj["examples"] = field_examples
 
         return {curr_key: curr_obj}
 
@@ -161,20 +225,51 @@ def _get_properties(level, parts, props, json_schema):
         sub_schemas = props.get("anyOf")
 
         for sub_schema in sub_schemas:
-            anyOf.append(_get_properties(level + 1, parts, sub_schema, json_schema))
+            anyOf.append(
+                _get_properties(
+                    level,
+                    parts,
+                    sub_schema,
+                    json_schema,
+                    field_description,
+                    field_examples,
+                )
+            )
 
         curr_obj[curr_key]["anyOf"] = anyOf
         return {curr_key: curr_obj}
 
-    else:
-        curr_obj = {curr_key: {"type": "object", "properties": {}}}
-        curr_obj[curr_key]["properties"] = _get_properties(
-            level + 1, parts, {}, json_schema
+    elif "properties" in props:
+        curr_obj = copy.deepcopy(props)
+        curr_properties = curr_obj.get("properties", {})
+        curr_obj["properties"] = _get_properties(
+            level,
+            parts,
+            curr_properties,
+            json_schema,
+            field_description,
+            field_examples,
         )
         return curr_obj
 
+    elif "items" in props:
+        curr_obj = copy.deepcopy(props)
+        curr_properties = props.get("items", {})
+        curr_obj["items"] = _get_properties(
+            level,
+            parts,
+            curr_properties,
+            json_schema,
+            field_description,
+            field_examples,
+        )
+        return curr_obj
 
-def extract_nested_fields(data: Any, fields: List[str]) -> dict:
+    else:
+        return props
+
+
+def extract_nested_fields(data: Any, fields: List[Union[str, FieldMetadata]]) -> dict:
     """Extracts specified fields from a potentially nested data structure
     Args:
         data: The input data (can be any type)
@@ -190,8 +285,11 @@ def extract_nested_fields(data: Any, fields: List[str]) -> dict:
 
     for field_path in fields:
         try:
-            value = _get_nested_value(data, field_path)
-            results[field_path] = value
+            curr_path = (
+                field_path if isinstance(field_path, str) else field_path.json_path
+            )
+            value = _get_nested_value(data, curr_path)
+            results[curr_path] = value
         except (KeyError, TypeError, AttributeError, ValueError) as e:
             logger.error(f"Error extracting field {field_path}: {e}")
     return results
