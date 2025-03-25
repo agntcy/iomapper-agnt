@@ -7,11 +7,9 @@ from typing import List, TypedDict
 import pytest
 from langgraph.graph import END, START, StateGraph
 
-from agntcy_iomapper.agent.models import (
+from agntcy_iomapper.base import (
     AgentIOMapperInput,
     AgentIOMapperOutput,
-)
-from agntcy_iomapper.base import (
     ArgumentsDescription,
 )
 from agntcy_iomapper.langgraph import create_langraph_iomapper

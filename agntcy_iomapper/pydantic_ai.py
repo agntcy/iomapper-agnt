@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any, Literal, Optional, TypedDict
+from typing import Any, Literal, Optional, Union
 
 from openai import AsyncAzureOpenAI
 from pydantic import Field, model_validator
@@ -16,13 +16,13 @@ from pydantic_ai.messages import (
 )
 from pydantic_ai.models import KnownModelName
 from pydantic_ai.models.openai import OpenAIModel
-from typing_extensions import Self
+from typing_extensions import Self, TypedDict
 
-from agntcy_iomapper.agent import (
-    AgentIOMapper,
-    AgentIOMapperConfig,
+from agntcy_iomapper.base import BaseIOMapper
+from agntcy_iomapper.base.models import (
     AgentIOMapperInput,
     AgentIOMapperOutput,
+    BaseIOMapperConfig,
 )
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class PydanticAIAgentIOMapperInput(AgentIOMapperInput):
 PydanticAIAgentIOMapperOutput = AgentIOMapperOutput
 
 
-class PydanticAIAgentIOMapperConfig(AgentIOMapperConfig):
+class PydanticAIAgentIOMapperConfig(BaseIOMapperConfig):
     models: dict[str, AgentIOModelArgs] = Field(
         default={"azure:gpt-4o-mini": AgentIOModelArgs()},
         description="LLM configuration to use for translation",
@@ -90,14 +90,14 @@ class PydanticAIAgentIOMapperConfig(AgentIOMapperConfig):
         return self
 
 
-SupportedModelName = (
-    KnownModelName
-    | Literal[
+SupportedModelName = Union[
+    KnownModelName,
+    Literal[
         "azure:gpt-4o-mini",
         "azure:gpt-4o",
         "azure:gpt-4",
-    ]
-)
+    ],
+]
 
 
 def get_supported_agent(
@@ -131,7 +131,7 @@ def get_supported_agent(
     return Agent(model_name, **kwargs)
 
 
-class PydanticAIIOAgentIOMapper(AgentIOMapper):
+class PydanticAIIOAgentIOMapper(BaseIOMapper):
     def __init__(
         self,
         config: PydanticAIAgentIOMapperConfig,
@@ -197,7 +197,7 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
 
         return (system_prompt, user_prompt, message_history)
 
-    def _invoke(
+    def invoke(
         self,
         input: PydanticAIAgentIOMapperInput,
         messages: list[dict[str, str]],
@@ -213,7 +213,7 @@ class PydanticAIIOAgentIOMapper(AgentIOMapper):
         )
         return response.data
 
-    async def _ainvoke(
+    async def ainvoke(
         self,
         input: PydanticAIAgentIOMapperInput,
         messages: list[dict[str, str]],

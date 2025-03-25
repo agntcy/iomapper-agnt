@@ -6,7 +6,7 @@ import pytest
 from deepdiff import diff
 from jinja2.sandbox import SandboxedEnvironment
 
-from agntcy_iomapper.agent import AgentIOMapper
+from agntcy_iomapper.base import BaseIOMapper
 from agntcy_iomapper.pydantic_ai import (
     AgentIOModelArgs,
     AgentModelSettings,
@@ -66,7 +66,7 @@ async def test_agent_mapping_async(
     llmIOMapper = PydanticAIIOAgentIOMapper(
         llm_iomapper_config, jinja_env_async=jinja_env_async
     )
-    output = await llmIOMapper.ainvoke(input)
+    output = await llmIOMapper._ainvoke(input)
     if isinstance(output.data, str):
         equalp = await compare_outputs_async(
             llmIOMapper, output.data, expected_output.data
@@ -87,7 +87,7 @@ async def test_agent_mapping_async(
 @pytest.mark.llm
 def test_agent_mapping(llm_iomapper_config, jinja_env, input, expected_output):
     llmIOMapper = PydanticAIIOAgentIOMapper(llm_iomapper_config, jinja_env=jinja_env)
-    output = llmIOMapper.invoke(input)
+    output = llmIOMapper._invoke(input)
     if isinstance(output.data, str):
         equalp = compare_outputs(llmIOMapper, output.data, expected_output.data)
         assert equalp
@@ -120,9 +120,7 @@ Reasoning
 """
 
 
-async def compare_outputs_async(
-    iomapper: AgentIOMapper, text1: str, text2: str
-) -> bool:
+async def compare_outputs_async(iomapper: BaseIOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
         model_name,
@@ -139,7 +137,7 @@ async def compare_outputs_async(
     return match is not None and match.startswith("t")
 
 
-def compare_outputs(iomapper: AgentIOMapper, text1: str, text2: str) -> bool:
+def compare_outputs(iomapper: BaseIOMapper, text1: str, text2: str) -> bool:
     model_name = iomapper.config.default_model
     agent = get_supported_agent(
         model_name,

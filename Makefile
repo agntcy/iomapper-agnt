@@ -43,7 +43,7 @@ setup: set_python_env
 
 # ============================
 
-setup_test:
+setup_test: setup
 	@poetry install --with=test --all-extras
 
 test: setup_test
@@ -57,5 +57,5 @@ test_langgraph_agent: setup_test
 
 test_langgraph_software: setup_test
 	poetry run pytest tests/test_langgraph_graph_with_io_mapper.py
-unittest:
+unittest: setup_test
 	poetry run pytest tests/unittests -vvrx

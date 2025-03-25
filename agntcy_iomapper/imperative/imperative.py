@@ -21,6 +21,7 @@ from typing import Any, Callable, Optional, Union
 
 import jsonschema
 from jsonpath_ng.ext import parse
+from langgraph.utils.runnable import RunnableCallable
 
 from agntcy_iomapper.base import (
     BaseIOMapper,
@@ -37,34 +38,30 @@ ImperativeIOMapperOutput = BaseIOMapperOutput
 
 
 class ImperativeIOMapper(BaseIOMapper):
-    field_mapping: dict[str, Union[str, Callable]]
-    """A dictionary for where the keys are fields of the output object
-    and values are JSONPath (strings) representing how the mapping
-    """
 
     def __init__(
         self,
-        field_mapping: Optional[dict[str, Union[str, Callable]]],
+        input: ImperativeIOMapperInput,
+        field_mapping: dict[str, Union[str, Callable]],
         config: Optional[BaseIOMapperConfig] = None,
     ) -> None:
         super().__init__(config)
         self.field_mapping = field_mapping
+        self.input = input
 
-    def invoke(
-        self, input: ImperativeIOMapperInput
-    ) -> Optional[ImperativeIOMapperOutput]:
-        if input.data is None:
+    def invoke(self, data: any) -> dict:
+        _input = self.input if self.input else None
+
+        if _input is None or _input.data is None:
             return None
         if self.field_mapping is None:
-            return ImperativeIOMapperOutput(data=input.data)
+            return _input.data
 
-        data = self._imperative_map(input)
-        return ImperativeIOMapperOutput(data=data)
+        data = self._imperative_map(_input)
+        return json.loads(data)
 
-    def ainvoke(
-        self, input: ImperativeIOMapperInput
-    ) -> Optional[ImperativeIOMapperOutput]:
-        return self.invoke(input)
+    async def ainvoke(self, state: any) -> dict:
+        return self.invoke()
 
     def _imperative_map(self, input_definition: ImperativeIOMapperInput) -> Any:
         """
@@ -75,21 +72,6 @@ class ImperativeIOMapper(BaseIOMapper):
         ValidationError if the data does not conform to the expected schema for
         the target type.
 
-        Parameters:
-        ----------
-        data : Any
-            The input data to be converted. This can be of any type.
-        Returns:
-        -------
-        Any
-            The converted data in the desired output type.
-        Raises:
-        ------
-        ValidationError
-            If the input data does not conform to the expected schema for the
-            target type.
-        Notes:
-        -----
         The function assumes that the caller provides a valid `input_schema`.
         Unsupported target types should be handled as needed within the function.
         """
@@ -151,3 +133,6 @@ class ImperativeIOMapper(BaseIOMapper):
         copy_data[parts[-1]] = value
 
         return copy_data
+
+    def as_runnable(self):
+        return RunnableCallable(self.invoke, self.ainvoke, name="extract", trace=False)

@@ -9,9 +9,8 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 from pydantic import Field
 
-from agntcy_iomapper.agent.base import AgentIOMapper
-from agntcy_iomapper.agent.models import (
-    AgentIOMapperConfig,
+from agntcy_iomapper.base import BaseIOMapper, BaseIOMapperConfig
+from agntcy_iomapper.base.models import (
     AgentIOMapperInput,
     AgentIOMapperOutput,
 )
@@ -22,7 +21,7 @@ LangGraphIOMapperInput = AgentIOMapperInput
 LangGraphIOMapperOutput = AgentIOMapperOutput
 
 
-class LangGraphIOMapperConfig(AgentIOMapperConfig):
+class LangGraphIOMapperConfig(BaseIOMapperConfig):
     llm: Union[BaseChatModel, str] = (
         Field(
             ...,
@@ -31,7 +30,7 @@ class LangGraphIOMapperConfig(AgentIOMapperConfig):
     )
 
 
-class _LangGraphAgentIOMapper(AgentIOMapper):
+class _LangGraphAgentIOMapper(BaseIOMapper):
     def __init__(
         self,
         config: Optional[LangGraphIOMapperConfig] = None,
@@ -45,7 +44,7 @@ class _LangGraphAgentIOMapper(AgentIOMapper):
         else:
             self.llm = config.llm
 
-    def _invoke(
+    def invoke(
         self,
         input: LangGraphIOMapperInput,
         messages: list[dict[str, str]],
@@ -56,7 +55,7 @@ class _LangGraphAgentIOMapper(AgentIOMapper):
         response = self.llm.invoke(messages, config, **kwargs)
         return response.content
 
-    async def _ainvoke(
+    async def ainvoke(
         self,
         input: LangGraphIOMapperOutput,
         messages: list[dict[str, str]],
@@ -79,7 +78,7 @@ class LangGraphIOMapper:
 
     async def ainvoke(self, state: dict[str, Any], config: RunnableConfig) -> dict:
         input = self._input if self._input else state["input"]
-        response = await self._iomapper.ainvoke(input=input, config=config)
+        response = await self._iomapper._ainvoke(input=input, config=config)
         if response is not None:
             return response.data
         else:
@@ -87,7 +86,7 @@ class LangGraphIOMapper:
 
     def invoke(self, state: dict[str, Any], config: RunnableConfig) -> dict:
         input = self._input if self._input else state["input"]
-        response = self._iomapper.invoke(input=input, config=config)
+        response = self._iomapper._invoke(input=input, config=config)
 
         if response is not None:
             return response.data

@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 from openapi_pydantic import DataType, Schema
 
-from agntcy_iomapper.agent import (
+from agntcy_iomapper.base import (
     AgentIOMapperInput,
     AgentIOMapperOutput,
+    ArgumentsDescription,
 )
-from agntcy_iomapper.base import ArgumentsDescription
 
 AGENTIO_TEST_PARAMETERS_TRANSLATIONS = [
     (
