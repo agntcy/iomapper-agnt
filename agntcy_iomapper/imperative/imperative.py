@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
-# SPDX-License-Identifier: Apache-2.0"
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
+# SPDX-License-Identifier: Apache-2.0
+
 """
 The deterministic I/O mapper is a component
 designed to translate specific inputs into

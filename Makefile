@@ -1,3 +1,6 @@
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
+# SPDX-License-Identifier: Apache-2.0
+
 PROJECT_NAME := agntcy_iomapper
 DOCKER_IMAGE=$(PROJECT_NAME)
 DOCKER_TAG=latest
