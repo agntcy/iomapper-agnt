@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
-from typing import Any, List, TypedDict
+from typing import List, Optional
 
 from llama_index.core.output_parsers import PydanticOutputParser
 from llama_index.core.workflow import (
@@ -11,11 +11,16 @@ from llama_index.core.workflow import (
     Workflow,
     step,
 )
-from pydantic import TypeAdapter
+from pydantic import BaseModel, Field
 
-from agntcy_iomapper.llamaindex import IOMappingWorkflow
+from agntcy_iomapper import IOMappingAgent, IOMappingAgentMetadata
+from agntcy_iomapper.llamaindex import (
+    IOMappingInputEvent,
+    IOMappingOutputEvent,
+    LLamaIndexIOMapperConfig,
+)
 from examples.llm import Framework, get_azure
-from examples.models import Campaign, User
+from examples.models import Campaign, Statistics, User
 from examples.models.data import users
 
 
@@ -31,9 +36,9 @@ class CampaignCreatedEvent(Event):
     campaign: Campaign
 
 
-class OverallState(TypedDict):
+class OverallState(BaseModel):
     campaign_details: Campaign
-    stats: Any
+    stats: Optional[Statistics] = Field(None)
     selected_users: List[User]
 
 
@@ -51,8 +56,8 @@ class CampaignWorkflow(Workflow):
 
     @step
     async def create_campaign(
-        self, ctx: Context, ev: CreateCampaignEvent, io_mapping_workflow: Workflow
-    ) -> StopEvent:
+        self, ctx: Context, ev: CreateCampaignEvent
+    ) -> IOMappingInputEvent:
         prompt = f"""
         You are a campaign builder for company XYZ. Given a list of selected users and a user prompt, create an engaging campaign. 
         Return the campaign details as a JSON object with the following structure:
@@ -70,27 +75,37 @@ class CampaignWorkflow(Workflow):
         llm_response = llm.complete(prompt)
         try:
             campaign_details = parser.parse(str(llm_response))
-            result = await io_mapping_workflow.run(
-                context=ctx,
-                data={
-                    "campaign_details": campaign_details,
-                    "stats": None,
-                    "selected_users": ev.list_users,
-                },
+            metadata = IOMappingAgentMetadata(
                 input_fields=["selected_users", "campaign_details.name"],
                 output_fields=["stats"],
             )
-            return StopEvent(result=result)
+            config = LLamaIndexIOMapperConfig(llm=llm)
+
+            io_mapping_input_event = IOMappingInputEvent(
+                metadata=metadata,
+                config=config,
+                data=OverallState(
+                    campaign_details=campaign_details,
+                    selected_users=ev.list_users,
+                ),
+            )
+            return io_mapping_input_event
         except Exception as e:
             print(f"Error parsing campaign details: {e}")
             return StopEvent(result=f"{e}")
+
+    @step
+    async def after_translation(self, evt: IOMappingOutputEvent) -> StopEvent:
+        return StopEvent(result="Done")
 
 
 async def main():
     llm = get_azure(framework=Framework.LLAMA_INDEX)
     w = CampaignWorkflow()
-    w.add_workflows(io_mapping_workflow=IOMappingWorkflow())
+
+    IOMappingAgent.as_worfklow_step(workflow=w)
     result = await w.run(prompt="Create a campaign for all users", llm=llm)
+
     print(result)
 
 

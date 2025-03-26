@@ -1,85 +1,22 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
+import json
+import logging
+import re
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import ClassVar, Optional
 
-from openapi_pydantic import Schema
-from pydantic import BaseModel, Field, model_validator
-from typing_extensions import Self
+import jsonschema
+from jinja2 import Environment
+from jinja2.sandbox import SandboxedEnvironment
 
+from agntcy_iomapper.base.models import (
+    AgentIOMapperInput,
+    AgentIOMapperOutput,
+    BaseIOMapperConfig,
+)
 
-class ArgumentsDescription(BaseModel):
-    """
-    ArgumentsDescription a pydantic model that defines
-    the details necessary to perfom io mapping between two agents
-    """
-
-    json_schema: Optional[Schema] = Field(
-        default=None, description="Data format JSON schema"
-    )
-    description: Optional[str] = Field(
-        default=None, description="Data (semantic) natural language description"
-    )
-    agent_manifest: Optional[dict[str, Any]] = Field(
-        default=None,
-        description="Agent Manifest definition as per https://agntcy.github.io/acp-spec/openapi.html#model/agentmanifest",
-    )
-
-    @model_validator(mode="after")
-    def _validate_obj(self) -> Self:
-        if (
-            self.json_schema is None
-            and self.description is None
-            and self.agent_manifest
-        ):
-            raise ValueError(
-                'Either the "schema" field and/or the "description" or agent_manifest field must be specified.'
-            )
-        return self
-
-
-class BaseIOMapperInput(BaseModel):
-    input: ArgumentsDescription = Field(
-        description="Input data descriptions",
-    )
-    output: ArgumentsDescription = Field(
-        description="Output data descriptions",
-    )
-    data: Any = Field(description="Data to translate")
-
-    @model_validator(mode="after")
-    def _validate_obj(self) -> Self:
-        if self.input.agent_manifest is not None:
-            # given an input agents manifest map its ouput definition
-            # because the data to be mapped is the result of calling the input agent
-            self.input.json_schema = Schema.model_validate(
-                self.input.agent_manifest["specs"]["output"]
-            )
-
-        if self.output.agent_manifest:
-            # given an output agents manifest map its input definition
-            # because the data to be mapped would be mapped to it's input
-            self.output.json_schema = Schema.model_validate(
-                self.output.agent_manifest["specs"]["input"]
-            )
-
-        return self
-
-
-class BaseIOMapperOutput(BaseModel):
-    data: Any = Field(default=None, description="Data after translation")
-    error: str | None = Field(
-        max_length=4096, default=None, description="Description of error on failure."
-    )
-
-
-class BaseIOMapperConfig(BaseModel):
-    validate_json_input: bool = Field(
-        default=False, description="Validate input against JSON schema."
-    )
-    validate_json_output: bool = Field(
-        default=False, description="Validate output against JSON schema."
-    )
+logger = logging.getLogger(__name__)
 
 
 class BaseIOMapper(ABC):
@@ -87,24 +24,187 @@ class BaseIOMapper(ABC):
     All io mappers wrappers inherited from BaseIOMapper.
     """
 
+    _json_search_pattern: ClassVar[re.Pattern] = re.compile(
+        r"```json\n(.*?)\n```", re.DOTALL
+    )
+
     def __init__(
         self,
         config: Optional[BaseIOMapperConfig] = None,
+        jinja_env: Optional[Environment] = None,
+        jinja_env_async: Optional[Environment] = None,
     ):
-        self.config = config if config is not None else BaseIOMapperConfig()
+        if config is None:
+            config = BaseIOMapperConfig()
+
+        if jinja_env is not None and jinja_env.is_async:
+            raise ValueError("Async Jinja env passed to jinja_env argument")
+        elif jinja_env_async is not None and not jinja_env_async.is_async:
+            raise ValueError("Sync Jinja env passed to jinja_env_async argument")
+
+        self.jinja_env = jinja_env
+        self.prompt_template = None
+        self.user_template = None
+
+        self.jinja_env_async = jinja_env_async
+        self.prompt_template_async = None
+        self.user_template_async = None
+        self.config = config
+
+    # Delay init until sync or async functions called.
+    def _check_jinja_env(self, enable_async: bool):
+        if enable_async:
+            # Delay load of env until needed
+            if self.jinja_env_async is None:
+                # Default is sandboxed, no loader
+                self.jinja_env_async = SandboxedEnvironment(
+                    loader=None,
+                    enable_async=True,
+                    autoescape=False,
+                )
+            if self.prompt_template_async is None:
+                self.prompt_template_async = self.jinja_env_async.from_string(
+                    self.config.system_prompt_template
+                )
+            if self.user_template_async is None:
+                self.user_template_async = self.jinja_env_async.from_string(
+                    self.config.message_template
+                )
+        else:
+            if self.jinja_env is None:
+                self.jinja_env = SandboxedEnvironment(
+                    loader=None,
+                    enable_async=False,
+                    autoescape=False,
+                )
+            if self.prompt_template is None:
+                self.prompt_template = self.jinja_env.from_string(
+                    self.config.system_prompt_template
+                )
+            if self.user_template is None:
+                self.user_template = self.jinja_env.from_string(
+                    self.config.message_template
+                )
+
+    def _get_render_env(self, input: AgentIOMapperInput) -> dict[str, str]:
+        return {
+            "input": input.input,
+            "output": input.output,
+            "data": input.data,
+        }
+
+    def _get_output(
+        self, input: AgentIOMapperInput, outputs: str
+    ) -> AgentIOMapperOutput:
+
+        if input.output.json_schema is None:
+            # If there is no schema, quote the chars for JSON.
+            return AgentIOMapperOutput.model_validate_json(
+                f'{{"data": {json.dumps(outputs)} }}'
+            )
+
+        logger.debug(f"{outputs}")
+
+        # Check if data is returned in JSON markdown text
+        matches = self._json_search_pattern.findall(outputs)
+        if matches:
+            outputs = matches[-1]
+
+        return AgentIOMapperOutput.model_validate_json(f'{{"data": {outputs} }}')
+
+    def _validate_input(self, input: AgentIOMapperInput) -> None:
+        if self.config.validate_json_input and input.input.json_schema is not None:
+            jsonschema.validate(
+                instance=input.data,
+                schema=input.input.json_schema.model_dump(
+                    exclude_none=True, mode="json"
+                ),
+            )
+
+    def _validate_output(
+        self, input: AgentIOMapperInput, output: AgentIOMapperOutput
+    ) -> None:
+        if self.config.validate_json_output and input.output.json_schema is not None:
+            output_schema = input.output.json_schema.model_dump(
+                exclude_none=True, mode="json"
+            )
+            logging.debug(f"Checking output schema: {output_schema}")
+            jsonschema.validate(
+                instance=output.data,
+                schema=output_schema,
+            )
+
+    def _invoke(self, input: AgentIOMapperInput, **kwargs) -> AgentIOMapperOutput:
+        self._validate_input(input)
+        self._check_jinja_env(False)
+        render_env = self._get_render_env(input)
+        system_prompt = self.prompt_template.render(render_env)
+
+        if input.message_template is not None:
+            logging.info(f"User template supplied on input: {input.message_template}")
+            user_template = self.jinja_env.from_string(input.message_template)
+        else:
+            user_template = self.user_template
+        user_prompt = user_template.render(render_env)
+
+        outputs = self.invoke(
+            input,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            **kwargs,
+        )
+        logging.debug(f"The LLM returned: {outputs}")
+        output = self._get_output(input, outputs)
+
+        self._validate_output(input, output)
+        return output
+
+    async def _ainvoke(
+        self, input: AgentIOMapperInput, **kwargs
+    ) -> AgentIOMapperOutput:
+        self._validate_input(input)
+        self._check_jinja_env(True)
+        render_env = self._get_render_env(input)
+        system_prompt = await self.prompt_template_async.render_async(render_env)
+
+        if input.message_template is not None:
+            logging.info(f"User template supplied on input: {input.message_template}")
+            user_template_async = self.jinja_env_async.from_string(
+                input.message_template
+            )
+        else:
+            user_template_async = self.user_template_async
+        user_prompt = await user_template_async.render_async(render_env)
+
+        outputs = await self.ainvoke(
+            input,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            **kwargs,
+        )
+        logging.debug(f"The LLM returned: {outputs}")
+        output = self._get_output(input, outputs)
+        self._validate_output(input, output)
+        return output
 
     @abstractmethod
-    def invoke(self, input: BaseIOMapperInput) -> BaseIOMapperOutput:
-        """Pass input data
-        to be mapped and returned represented in the output schema
+    def invoke(
+        self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs
+    ) -> str:
+        """Invoke internal model to process messages.
         Args:
-            input: the data to be mapped
+            messages: the messages to send to the LLM
         """
 
     @abstractmethod
-    async def ainvoke(self, input: BaseIOMapperInput) -> BaseIOMapperOutput:
-        """Pass input data
-        to be mapped and returned represented in the output schema
+    async def ainvoke(
+        self, input: AgentIOMapperInput, messages: list[dict[str, str]], **kwargs
+    ) -> str:
+        """Async invoke internal model to process messages.
         Args:
-            input: the data to be mapped
+            messages: the messages to send to the LLM
         """

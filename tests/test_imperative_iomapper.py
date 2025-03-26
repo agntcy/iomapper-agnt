@@ -177,21 +177,19 @@ def test_imperative_iomapp(
     input_schema, output_schema, field_mapping, input_value, expected
 ) -> None:
     """Test imperative io mapping"""
-
-    io_mapp = ImperativeIOMapper(
-        field_mapping=field_mapping,
-    )
-
     input = ImperativeIOMapperInput(
         input=ArgumentsDescription(json_schema=Schema.model_validate(input_schema)),
         output=ArgumentsDescription(json_schema=Schema.model_validate(output_schema)),
         data=input_value,
     )
-    actual = io_mapp.invoke(input=input)
+
+    io_mapp = ImperativeIOMapper(field_mapping=field_mapping, input=input)
+
+    actual = io_mapp.invoke(data=json.dumps(input_value))
 
     # When test returns none fail the test
     if actual is None:
         assert True is False
         return
 
-    assert expected == json.loads(actual.data)
+    assert expected == actual

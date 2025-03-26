@@ -1,9 +1,12 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# SPDX-License-Identifier: Apache-2.0
+
 from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from agntcy_iomapper.agent.models import FieldMetadata
+from agntcy_iomapper.base.models import FieldMetadata
 from agntcy_iomapper.base.utils import create_type_from_schema
 
 

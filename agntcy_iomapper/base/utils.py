@@ -1,11 +1,16 @@
 import copy
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import jsonref
+from openapi_pydantic import Schema
+from pydantic import BaseModel
 
-from agntcy_iomapper.agent.models import FieldMetadata
+from agntcy_iomapper.base.models import (
+    FieldMetadata,
+    IOMappingAgentMetadata,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +110,7 @@ def create_type_from_schema(
         else:
             curr_path_schema[curr_key] = {"type": "object", "properties": {}}
             if len(parts) == 1:
-                curr_path_schema[curr_key]["properties"] = flatten_json
+                curr_path_schema[curr_key] = flatten_json
                 if field_description:
                     curr_path_schema[curr_key]["description"] = field_description
             else:
@@ -313,3 +318,29 @@ def _get_nested_value(data: Any, field_path: str) -> Optional[Any]:
             current = None
 
     return current
+
+
+def get_io_types(data: Any, metadata: IOMappingAgentMetadata) -> Tuple[Schema, Schema]:
+    data_schema = None
+
+    if isinstance(data, BaseModel):
+        data_schema = data.model_json_schema()
+    # If input schema is provided it overwrites the data schema
+    input_schema = metadata.input_schema if metadata.input_schema else data_schema
+    # If output schema is provided it overwrites the data schema
+    output_schema = metadata.output_schema if metadata.output_schema else data_schema
+
+    if not input_schema or not output_schema:
+        raise ValueError(
+            "input_schema, and or output_schema are missing from the metadata, for a better accuracy you are required to provide them in this scenario, or we  could not infer the type from the state"
+        )
+
+    input_type = Schema.model_validate(
+        create_type_from_schema(input_schema, metadata.input_fields)
+    )
+
+    output_type = Schema.model_validate(
+        create_type_from_schema(output_schema, metadata.output_fields)
+    )
+
+    return (input_type, output_type)

@@ -15,7 +15,7 @@ install: venv
 	$(PIP) install -r $(REQUIREMENTS)
 
 run_imperative_eg: install
-	$(PYTHON) $(EXAMPLES)/imperative.py
+	$(PYTHON) langgraph/imperative.py
 
 run_lg_eg_pyd: install
 	$(PYTHON) langgraph/langgraph_pydantic.py
@@ -25,6 +25,12 @@ run_lg_eg_td: install
 
 run_llma_idx: install
 	$(PYTHON) llamaindex/llamaindex_workflow.py
+
+
+run_llma_wfl: install
+	$(PYTHON) llamaindex/llamaindex_agent_workflow.py
+
+
 
 run_acp: install
 	$(PYTHON) acp/__main__.py

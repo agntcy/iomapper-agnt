@@ -6,7 +6,7 @@ import pytest
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
-from agntcy_iomapper import IOMappingAgent, IOMappingAgentMetadata
+from agntcy_iomapper import FieldMetadata, IOMappingAgent, IOMappingAgentMetadata
 from examples.models import Campaign, Communication, Statistics, User
 from examples.models.data import users
 
@@ -31,8 +31,12 @@ def test_langgraph_agent_in_a_graph_application(llm_instance):
 
     metadata = IOMappingAgentMetadata(
         input_fields=["selected_users", "campaign_details.name"],
-        output_fields=["stats.status"],
-        output_description_prompt="the status value must contain value yes or no, if selected_users is not empty, than it should have yes otherwise no",
+        output_fields=[
+            FieldMetadata(
+                json_path="stats.status",
+                description="the status value must contain value yes or no, if selected_users is not empty, than it should have yes otherwise no",
+            )
+        ],
     )
 
     mapping_agent = IOMappingAgent(metadata=metadata, llm=llm_instance)
