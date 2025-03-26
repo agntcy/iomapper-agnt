@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 
 import re
@@ -18,7 +18,7 @@ class State(TypedDict):
     output: LangGraphIOMapperOutput
 
 
-__COMPARE_SYSTEM_PROMPT = """You are comparing two texts for similarity. 
+__COMPARE_SYSTEM_PROMPT = """You are comparing two texts for similarity.
 First, write out in a step by step manner your reasoning to be sure that your conclusion is correct. Avoid simply stating the correct answer at the outset. Then print only a single choice from [true, false] (without quotes or punctuation) on its own line corresponding to the correct answer. At the end, repeat just the answer by itself on a new line.
 """
 __COMPARE_USER_PROMPT = """Here is the data:

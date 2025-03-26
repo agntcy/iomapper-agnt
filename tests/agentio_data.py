@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+
 from openapi_pydantic import DataType, Schema
 
 from agntcy_iomapper.base import (

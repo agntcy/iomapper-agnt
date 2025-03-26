@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+
 import pytest
 from dotenv import find_dotenv, load_dotenv
 from langchain_openai.chat_models.azure import AzureChatOpenAI

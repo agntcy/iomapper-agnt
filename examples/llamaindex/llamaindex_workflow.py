@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+
 from typing import List, Optional
 
 from llama_index.core.output_parsers import PydanticOutputParser
@@ -59,7 +60,7 @@ class CampaignWorkflow(Workflow):
         self, ctx: Context, ev: CreateCampaignEvent
     ) -> IOMappingInputEvent:
         prompt = f"""
-        You are a campaign builder for company XYZ. Given a list of selected users and a user prompt, create an engaging campaign. 
+        You are a campaign builder for company XYZ. Given a list of selected users and a user prompt, create an engaging campaign.
         Return the campaign details as a JSON object with the following structure:
         {{
             "name": "Campaign Name",

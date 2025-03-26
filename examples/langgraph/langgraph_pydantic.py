@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+
 from typing import List, Optional
 
 from langchain_core.messages import SystemMessage
@@ -32,7 +33,7 @@ def select_user_node(state: OverallState):
 
 def define_campaign_node(state: OverallState):
     prompt = f"""
-    You are a campaign builder for company XYZ. Given a list of selected users and a user prompt, create an engaging campaign. 
+    You are a campaign builder for company XYZ. Given a list of selected users and a user prompt, create an engaging campaign.
     Return the campaign details as a JSON object with the following structure:
     {{
         "name": "Campaign Name",
@@ -58,7 +59,7 @@ def define_campaign_node(state: OverallState):
 
 def create_communication(state: OverallState):
     prompt = f"""
-    You are an email communication creator. Given a campaign and a list of selected users, create an email communication. 
+    You are an email communication creator. Given a campaign and a list of selected users, create an email communication.
     Return the communication details as a JSON object with the following structure:
     {{
         "subject": "Email Subject",
