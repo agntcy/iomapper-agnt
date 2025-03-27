@@ -1,6 +1,6 @@
 [project]
 name = "agntcy-iomapper"
-version = "0.2.0a0"
+version = "0.2.1"
 license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
@@ -10,6 +10,12 @@ authors = [
 maintainers = [
     { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
+
+[project.urls]
+Homepage = "https://github.com/agntcy/iomapper-agnt"
+Source = "https://github.com/agntcy/iomapper-agnt"
+Documentation = "https://docs.agntcy.org/pages/semantic_sdk/io_mapper.html"
+Issues = "https://github.com/agntcy/iomapper-agnt/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.9.0,<4.0"
@@ -22,7 +28,7 @@ jsonschema = { extras = ["format"], version = "^4.23.0" }
 jsonpath-ng = "^1.7.0"
 pydantic = "^2.10.6"
 langchain = { version = "^0.3.19", optional = true }
-langgraph = { version = "^0.2.73", optional = true }
+langgraph = { version = "^0.3.16", optional = true }
 langchain-openai = { version = "^0.3.6", optional = true }
 llama-index = "^0.12.20"
 jsonref = "^1.1.0"
