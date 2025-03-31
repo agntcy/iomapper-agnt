@@ -5,10 +5,10 @@ license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
 authors = [
-    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+  { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 maintainers = [
-    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+  { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 
 [project.urls]
@@ -20,7 +20,6 @@ Issues = "https://github.com/agntcy/iomapper-agnt/issues"
 [tool.poetry.dependencies]
 python = ">=3.9.0,<4.0"
 python-dotenv = "^1.0.1"
-aiofiles = "^24.1.0"
 jinja2 = "^3.1.5"
 openapi-pydantic = "^0.5.1"
 pydantic-ai = { version = "^0.0.23", optional = true }

@@ -133,7 +133,7 @@ class IOMappingAgent(BaseModel):
         However, it does not utilize a language model for IO mapping, offering an imperative approach to agent integration.
         """
 
-        input_type, output_type = self._get_io_types(data, self.metadata)
+        input_type, output_type = get_io_types(data, self.metadata)
 
         data_to_be_mapped = extract_nested_fields(
             data, fields=self.metadata.input_fields
