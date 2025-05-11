@@ -27,7 +27,7 @@ jsonschema = { extras = ["format"], version = "^4.23.0" }
 jsonpath-ng = "^1.7.0"
 pydantic = "^2.10.6"
 langchain = { version = "^0.3.19", optional = true }
-langgraph = { version = "^0.3.16", optional = true }
+langgraph = { version = ">=0.3.16", optional = true }
 langchain-openai = { version = "^0.3.6", optional = true }
 llama-index = "^0.12.20"
 jsonref = "^1.1.0"
