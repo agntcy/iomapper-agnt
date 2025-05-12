@@ -1,6 +1,6 @@
 [project]
 name = "agntcy-iomapper"
-version = "0.2.2"
+version = "0.2.3"
 license = "Apache-2.0"
 description = "A tool to transform output from one agent to the input of another."
 readme = "README.md"
