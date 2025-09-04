@@ -39,7 +39,7 @@ pydantic-ai = ["pydantic-ai"]
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 pytest-asyncio = "^0.23.5"
-deepdiff = "^8.1.1"
+deepdiff = "^8.6.1"
 
 
 [tool.poetry.group.sanity.dependencies]
